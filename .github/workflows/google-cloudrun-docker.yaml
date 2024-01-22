@@ -54,7 +54,7 @@ on:
 env:
   PROJECT_ID: tsmc-test-412003 # TODO: update Google Cloud project id
   GAR_LOCATION: asia-east1 # TODO: update Artifact Registry location
-  REPOSITORY: cloud-run-source-deploy # TODO: update Artifact Registry repository name
+  REPOSITORY: github-repo # TODO: update Artifact Registry repository name
   SERVICE: stateless-service # TODO: update Cloud Run service name
   REGION: asia-east1 # TODO: update Cloud Run service region
 
@@ -120,7 +120,8 @@ jobs:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
           # NOTE: If using a pre-built image, update the image name here
-          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+          # image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ github.sha }}
           # NOTE: You can also set env variables here:
           #  env_vars: |
           #  NODE_ENV=production
