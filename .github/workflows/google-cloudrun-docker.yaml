@@ -49,13 +49,12 @@ name: Build and Deploy to Cloud Run
 
 on:
   push:
-    branches:
-      - $default-branch
+    branches: [ "main" , "develop" , "stage" ]
 
 env:
   PROJECT_ID: tsmc-test-412003 # TODO: update Google Cloud project id
   GAR_LOCATION: asia-east1 # TODO: update Artifact Registry location
-  REPOSITORY: asia-east1-docker.pkg.dev/tsmc-test-412003/cloud-run-source-deploy # TODO: update Artifact Registry repository name
+  REPOSITORY: cloud-run-source-deploy # TODO: update Artifact Registry repository name
   SERVICE: stateless-service # TODO: update Cloud Run service name
   REGION: asia-east1 # TODO: update Cloud Run service region
 
