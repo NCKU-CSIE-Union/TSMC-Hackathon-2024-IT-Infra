@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Bandit Test
-        uses: mdegis/bandit-action@v1
+        uses: mdegis/bandit-action@v1.0.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           path: "."
