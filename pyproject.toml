@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "tsmc-hackathon-2024-it-infra"
+version = "0.1.0"
+description = "TSMC hackathon 2024 IT Infor Group"
+authors = ["jason810496 <810496@email.wlsh.tyc.edu.tw>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pre-commit = "^3.6.0"
+ruff = "^0.1.14"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

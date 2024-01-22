@@ -2,7 +2,8 @@ name: Build and Deploy to Cloud Run
 
 on:
   push:
-    branches: [ "main" , "develop" , "stage" ]
+    branches:
+      - main
 
 env:
   PROJECT_ID: tsmc-test-412003 # TODO: update Google Cloud project id
