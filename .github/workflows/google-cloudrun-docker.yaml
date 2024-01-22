@@ -89,9 +89,11 @@ jobs:
       # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
 
       # Authenticate Docker to Google Cloud Artifact Registry
+      # Fix : 
+      # ref : https://stackoverflow.com/questions/75840164/permission-artifactregistry-repositories-uploadartifacts-denied-on-resource-usin
       - name: Docker Auth
         id: docker-auth
-        uses: 'docker/login-action@v2'
+        uses: 'docker/login-action@v3'
         with:
           username: 'oauth2accesstoken'
           password: '${{ steps.auth.outputs.access_token }}'
