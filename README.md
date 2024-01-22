@@ -1,102 +1,43 @@
-# TSMC-Hackathon-2024-IT-Infra
+# TSMC Hackathon 2024 IT Infra
+
+> [!IMPORTANT]
+> We use **`Poetry`** to manage python package and virtual environment !!!
+
+<!-- 
+https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
+ -->
+
+## Idea Note
 
 
-## Cloud Run CI/CD
 
-> reference : https://medium.com/@vngauv/from-github-to-gce-automate-deployment-with-github-actions-27e89ba6add8
+## TODO
 
-### Google Cloud Project
+- [AI](#AI)
+- [DevOps](#DevOps)
+- [Monitor System (GCE)](#Monitor-System-GCE)
+- [Consumer (Consumer Cloud)](#Consumer-Cloud-Run)
+- [Discord Bot](#Service-Discord-Bot)
 
-https://console.cloud.google.com/projectcreate
+## Gitflow
 
-set project name
+### branch
+- main
+- develop
+- test
+- document
+- feature/xxx
+- fix/xxx
+- hotfix/xxx
 
-> Archived : use `Artifact Registry` instead of `Container Registry` 👇
-> ### Container Registry API Enable
->
-> search `container registry` on top search bar
-
-### Artifact Registry 
-
-enable Artifact Registry API
-
-### Auth
-
-two ways to auth
-1. Service Account
-2. Workload Identity
-
-> Service Account is **much easier** to setup !!!
-
-
-### IAM
-
-setup service account permission
-1. create service account
-    - using terminal
-    - using GCP console UI
-2. create service account key
-3. download service account key
-4. set service account key to github secret
-
-#### Create Service Account
-1. using terminal
-> in local terminal
-```
-export PROJECT_ID=tsmc-test-412003
-
-gcloud iam service-accounts create "github-service-account" \
-  --project "${PROJECT_ID}"
-```
-
-2. using GCP console UI
-
-#### Create Service Account Key
-
-> both are easy to do
-
-1. using terminal
-> in local terminal
-```
-gcloud iam service-accounts keys create "github-service-account.json" \
-  --project "${PROJECT_ID}" \
-  --iam-account "github-service-account@${PROJECT_ID}.iam.gserviceaccount.com"
-```
-
-2. using GCP console UI
-
-#### Workload Identity
-
-> in local terminal
-
-create workload identity pool : 
-```
-gcloud iam workload-identity-pools create "github-pool"
-  --project="${PROJECT_ID}" \
-  --location="global" \
-  --display-name="GitHub Deployment Poll"
-```
-get workload identity pool id : 
-```
-gcloud iam workload-identity-pools describe "github-pool" \
-  --project="${PROJECT_ID}" \
-  --location="global" \
-  --format="value(name)"
-```
-> return : `projects/111111111/locations/global/workloadIdentityPools/my-pool`
-
-
-## Github Action : Cloud Run CI/CD from source ( include Build and Deploy )
-
-https://github.com/google-github-actions/example-workflows/blob/main/workflows/deploy-cloudrun/cloudrun-source.yml
-
-### env setup
-
-```
-PROJECT_ID: tsmc-test-412003 # TODO: update Google Cloud project id
-SERVICE: stateless-service # TODO: update Cloud Run service name
-REGION: asia-east1 # TODO: update Cloud Run region
-```
-- PROJECT_ID : Google Cloud Project ID
-- SERVICE : Cloud Run Service Name to be set
-- REGION : https://cloud.google.com/compute/docs/regions-zones
+### message
+- feat: 新增/修改功能 (feature)。
+- fix: 修補 bug (bug fix)。
+- docs: 文件 (documentation)。
+- style: 格式 (不影響程式碼運行的變動 white-space, formatting, missing semicolons, etc.)。
+- refactor: 重構 (既不是新增功能，也不是修補 bug 的程式碼變動)。
+- perf: 改善效能 (A code change that improves performance)。
+- test: 增加測試 (when adding missing tests)。
+- chore: 建構程序或輔助工具的變動 (maintain)。
+- revert: 撤銷回覆先前的 commit
+- ci: DevOps 相關設定
