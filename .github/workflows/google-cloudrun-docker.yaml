@@ -99,6 +99,7 @@ jobs:
           password: '${{ steps.auth.outputs.access_token }}'
           registry: '${{ env.GAR_LOCATION }}-docker.pkg.dev'
           
+      # My Note: can't use this method , it's not work
       # NOTE: Alternative option - authentication via credentials json
       # - name: Docker Auth
       # id: docker-auth
@@ -108,6 +109,8 @@ jobs:
       #   username: _json_key
       #   password: ${{ secrets.GCP_CREDENTIALS }}
 
+      # Build and push the container to Artifact Registry
+      # Fix : https://www.googlecloudcommunity.com/gc/Developer-Tools/Permission-quot-artifactregistry-repositories-uploadArtifacts/m-p/543870
       - name: Build and Push Container
         run: |-
           docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./backend
@@ -118,28 +121,18 @@ jobs:
 
       # END - Docker auth and build
 
-      # - name: Deploy to Cloud Run
-      #   id: deploy
-      #   uses: google-github-actions/deploy-cloudrun@v2
-      #   with:
-      #     service: ${{ env.SERVICE }}
-      #     region: ${{ env.REGION }}
-      #     # NOTE: If using a pre-built image, update the image name here
-      #     image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          # NOTE: If using a pre-built image, update the image name here
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           # NOTE: You can also set env variables here:
           #  env_vars: |
           #  NODE_ENV=production
           #  TOKEN_EXPIRE=6400
-
-
-      # Fix : https://www.googlecloudcommunity.com/gc/Developer-Tools/Permission-quot-artifactregistry-repositories-uploadArtifacts/m-p/543870
-      - name: Deploy to Cloud Run Test
-        id: deploy
-        run: |-
-          gcloud auth print-access-token
-          gcloud infor 
-          gcloud gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://${{ env.GAR_LOCATION }}-docker.pkg.dev
-          gcloud run deploy ${{ env.SERVICE }} --image=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }} --platform=managed --region=${{ env.REGION }} --allow-unauthenticated
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
