@@ -1,9 +1,19 @@
-from google.cloud import run_v2
+import time
+
+from google.cloud import monitoring_v3, run_v2
+
+project_id = "tsmccareerhack2024-icsd-grp5"
+project_name = f"projects/{project_id}"
 
 
 class CloudRunManager:
-    def __init__(self, client: run_v2.ServicesClient):
-        self.client = client
+    def __init__(
+        self,
+        run_client: run_v2.ServicesClient,
+        monitoring_client: monitoring_v3.MetricServiceClient,
+    ):
+        self.cloud_run_client = run_client
+        self.monitoring_client = monitoring_client
 
     def adjust_cpu_ram(self, instance_id, cpu=None, ram=None):
         """
@@ -31,7 +41,7 @@ class CloudRunManager:
             )
         )
 
-        operation = self.client.update_service(request=request)
+        operation = self.cloud_run_client.update_service(request=request)
 
         response = operation.result()  # Blocks until operation is complete
         return response
@@ -56,12 +66,13 @@ class CloudRunManager:
             )
         )
 
-        operation = self.client.update_service(request=request)
+        operation = self.cloud_run_client.update_service(request=request)
 
         response = operation.result()  # Blocks until operation is complete
         return response
 
     def deploy_image(self, drone_id, image):
+        # self.client.
         """
         Deploys a new image to a cloud run.
 
@@ -80,13 +91,48 @@ class CloudRunManager:
             )
         )
 
-        operation = self.client.update_service(request=request)
+        operation = self.cloud_run_client.update_service(request=request)
 
         response = operation.result()  # Blocks until operation is complete
         return response
 
+    def get_metrics(
+        self,
+        instance_name,
+        start_time=int(time.time() - 60 * 60 * 3),
+        end_time=int(time.time()),
+    ):
+        """
+        Gets the metrics of a cloud run.
 
-# Example usage
-# adjust_cpu_ram('instance123', cpu='2 vCPUs', ram='4 GB')
-# adjust_instance_count(5)
-# deploy_image('new_image_version')
+        :param drone_id: The ID of the cloud run.
+        """
+
+        # TODO: currently only gets CPU utilization, add more metrics
+        return self.monitoring_client.list_time_series(
+            request=monitoring_v3.ListTimeSeriesRequest(
+                name=f"projects/{project_id}",
+                filter=f'metric.type="run.googleapis.com/container/cpu/utilizations" AND resource.label."configuration_name"="{instance_name}"',
+                aggregation=monitoring_v3.Aggregation(
+                    alignment_period={"seconds": 60},
+                    per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_DELTA,
+                    cross_series_reducer=monitoring_v3.Aggregation.Reducer.REDUCE_MEAN,
+                ),
+                interval=monitoring_v3.TimeInterval(
+                    {
+                        "start_time": {"seconds": int(start_time)},
+                        "end_time": {"seconds": int(end_time)},
+                    }
+                ),
+            ),
+        )
+
+
+if __name__ == "__main__":
+    monitoring_client = monitoring_v3.MetricServiceClient()
+    run_manager = CloudRunManager(
+        run_v2.ServicesClient(), monitoring_v3.MetricServiceClient()
+    )
+
+    metric = run_manager.get_metrics("consumer")
+    print(metric)
