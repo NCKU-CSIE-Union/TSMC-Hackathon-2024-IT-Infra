@@ -50,10 +50,9 @@ we can use docker-compose that place in `ci/setup/drone/docker-compose.yml` to s
 then you only need to change the following environment variables:
 
 ```env
-GITHUB_APP_CLIENT_ID=<place your github oauth application client id here>
-GITHUB_APP_CLIENT_SECRET=<place your github oauth application client secret here>
-DRONE_SECRET=<random string>
-DRONE_SERVER_HOST=<same as the github oauth application homepage url>
+DRONE_GITHUB_CLIENT_ID=<place your github oauth application client id here>
+DRONE_GITHUB_CLIENT_SECRET=<place your github oauth application client secret here>
+DRONE_SERVER_PROXY_HOST=<same as the github oauth application homepage url>
 ```
 
 ### Run Drone server
