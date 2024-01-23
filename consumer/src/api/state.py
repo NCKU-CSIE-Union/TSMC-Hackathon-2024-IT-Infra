@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 
 
+# archive
 router = APIRouter(
     prefix="/state",
     tags=["State"],
+    deprecated=True,
 )
 
 
@@ -13,7 +15,7 @@ async def state_cpu(rate: str, duration: int):
     return {"state": rate, "duration": duration}
 
 
-@router.get("/mem/{rate}/duration/{duration}", status_code=status.HTTP_200_OK)
+@router.get("/ram/{rate}/duration/{duration}", status_code=status.HTTP_200_OK)
 async def state_mem(rate: str, duration: int):
     return {"state": rate, "duration": duration}
 

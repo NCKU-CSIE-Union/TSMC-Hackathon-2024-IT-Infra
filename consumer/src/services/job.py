@@ -1,27 +1,33 @@
 import random
 import asyncio
 
+from core.config import get_settings
 from state.instance import Sleep, Counter, TotalQueryCount, AvgExecutionTime
 
+settings = get_settings()
 
 def check_enque():
     return random.randint(0, 1)
+
 
 def check_deque():
     return random.randint(0, 1)
 
 
 def get_enque_num():
-    return random.randint(1, 100)
+    return random.randint(settings.enqueue_lower_bound, settings.enqueue_upper_bound)
+
 
 def get_deque_num():
-    return random.randint(1, 100)
+    return random.randint(settings.dequeue_lower_bound, settings.dequeue_upper_bound)
 
 
 def enqueue(num: int):
     Counter.increase(num)
     TotalQueryCount.increase(num)
-    AvgExecutionTime.add_time(random.randint(1, 100), TotalQueryCount.get_count())
+    execution_time = random.randint(settings.execute_lower_bound, settings.execute_upper_bound)
+    AvgExecutionTime.add_time(execution_time, TotalQueryCount.get_count())
+
 
 def dequeue(num: int):
     Counter.decrease(num)
@@ -53,6 +59,8 @@ async def mock_behavior_task(*args, **kwargs):
             await asyncio.sleep(0.1)
         else:
             print("no deque")
+
+        await asyncio.sleep(settings.job_interval)
 
 
 class MockBehaviorBackgroundClass:
