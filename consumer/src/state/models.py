@@ -78,3 +78,41 @@ class AvgExecutionTimeModel:
         """
         with self.lock:
             self.avg_time = (self.avg_time * last_cnt + time_add) / (last_cnt + 1)
+
+
+class SleepModel:
+    """
+    - set sleep time
+    """
+
+    def __init__(self, sleep_time):
+        self.sleep_time = sleep_time
+        self.lock = threading.Lock()
+
+    def check_sleep_time(self) -> bool:
+        with self.lock:
+            return self.sleep_time > 0
+
+    def ack_sleep_time(self):
+        with self.lock:
+            sleep = self.sleep_time
+            self.sleep_time = 0
+            return sleep
+
+    def set_sleep_time(self, sleep_time):
+        with self.lock:
+            self.sleep_time = sleep_time
+
+
+class BackgroudJobModel:
+    def __init__(self):
+        self.job_class_instance = None
+        self.lock = threading.Lock()
+
+    def set_instance(self, instance):
+        with self.lock:
+            self.job_class_instance = instance
+
+    def get_instance(self):
+        with self.lock:
+            return self.job_class_instance
