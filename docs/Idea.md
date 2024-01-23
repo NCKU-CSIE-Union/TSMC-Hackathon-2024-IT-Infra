@@ -173,7 +173,7 @@ revert: 撤銷回覆先前的 commit
 
 範例：
 - `/full/cpu?duration=<duration>`
-- `/full/mem?duration=<duration>`
+- `/full/ram?duration=<duration>`
 - `/full/enqueue?num=<num>`
 - `/sleep?duration=<duration>`
 
