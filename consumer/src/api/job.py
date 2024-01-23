@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
-from typing import List
+from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from services.job import mock_behavior, BackgoundJobClass
+from services.job import MockBehaviorBackgroundClass
 from state.instance import BackgroundJobSaver
 
 router = APIRouter(prefix="/job", tags=["Job"])
@@ -10,11 +9,8 @@ router = APIRouter(prefix="/job", tags=["Job"])
 
 @router.get("/start", status_code=201)
 async def start_normal_behavior():
-    print(BackgroundJobSaver.get_instance())
-
     if BackgroundJobSaver.get_instance() is None:
-        bg_job = BackgoundJobClass()
-        print(bg_job)
+        bg_job = MockBehaviorBackgroundClass()
         BackgroundJobSaver.set_instance(bg_job)
         return JSONResponse(
             status_code=201, content={"message": "Background job started."}
@@ -27,7 +23,7 @@ async def start_normal_behavior():
 
 @router.get("/stop", status_code=status.HTTP_200_OK)
 async def stop_normal_behavior():
-    bg_job = BackgroundJobSaver.get_instance()
+    bg_job: MockBehaviorBackgroundClass = BackgroundJobSaver.get_instance()
     if bg_job is not None:
         if not bg_job.task.done():
             bg_job.task.cancel()
@@ -43,7 +39,7 @@ async def stop_normal_behavior():
 
 @router.get("/status", status_code=status.HTTP_200_OK)
 async def status_normal_behavior():
-    bg_job = BackgroundJobSaver.get_instance()
+    bg_job: MockBehaviorBackgroundClass = BackgroundJobSaver.get_instance()
 
     return JSONResponse(
         status_code=200,

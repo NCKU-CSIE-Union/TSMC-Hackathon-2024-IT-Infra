@@ -1,8 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from fastapi import APIRouter, status
 
-
-router = APIRouter(prefix="", tags=["Health"]   )
+router = APIRouter(prefix="", tags=["Health"])
 
 
 @router.get("/", status_code=status.HTTP_200_OK)

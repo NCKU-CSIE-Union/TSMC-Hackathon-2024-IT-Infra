@@ -15,9 +15,7 @@ from services.statistics import (
 from schema.statistics import HardwareResponse
 
 
-router = APIRouter(
-    prefix="/status", tags=["Status"]
-)
+router = APIRouter(prefix="/status", tags=["Status"])
 
 
 @router.get("/cpu", status_code=status.HTTP_200_OK, response_model=HardwareResponse)
@@ -38,12 +36,12 @@ async def status_mem():
     return HardwareResponse(percent=get_mem_percent(), usage=get_mem_usage())
 
 
-@router.get("/remain_count", status_code=status.HTTP_200_OK,response_model=int)
+@router.get("/remain_count", status_code=status.HTTP_200_OK, response_model=int)
 async def remain_count():
     return get_remain_count()
 
 
-@router.get("/avg_exe_time", status_code=status.HTTP_200_OK ,response_model=float)
+@router.get("/avg_exe_time", status_code=status.HTTP_200_OK, response_model=float)
 async def avg_exe_time():
     return get_avg_exe_time()
 
