@@ -12,5 +12,12 @@
 
 ### Cloud Run Log and Metrics Retrieve API
 
+#### Logging API
+
+- [python sdk for logging](https://cloud.google.com/logging/docs/reference/libraries#client-libraries-install-python)
+- [cloud run logging api](https://cloud.google.com/run/docs/logging)
+
+#### Metrics API
+
 - [cloud run metrics api](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-run)
-- [cloud run log api](https://cloud.google.com/run/docs/logging)
+- [python sdk for metrics](https://cloud.google.com/monitoring/docs/reference/libraries#client-libraries-install-python)
