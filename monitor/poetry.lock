@@ -207,6 +207,94 @@ reauth = ["pyu2f (>=0.1.5)"]
 requests = ["requests (>=2.20.0,<3.0.0.dev0)"]
 
 [[package]]
+name = "google-cloud-appengine-logging"
+version = "1.4.0"
+description = "Google Cloud Appengine Logging API client library"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "google-cloud-appengine-logging-1.4.0.tar.gz", hash = "sha256:fe74f418d0b01ebebe83ae212abf051ad42692a636677e397de3d459e00d7b64"},
+    {file = "google_cloud_appengine_logging-1.4.0-py2.py3-none-any.whl", hash = "sha256:226721903a2d50b6e51c43e59edb548c0bb08cc5f70e1a5f289d3edf2f09a8c9"},
+]
+
+[package.dependencies]
+google-api-core = {version = ">=1.34.0,<2.0.dev0 || >=2.11.dev0,<3.0.0dev", extras = ["grpc"]}
+proto-plus = ">=1.22.3,<2.0.0dev"
+protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
+
+[[package]]
+name = "google-cloud-audit-log"
+version = "0.2.5"
+description = "Google Cloud Audit Protos"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "google-cloud-audit-log-0.2.5.tar.gz", hash = "sha256:86e2faba3383adc8fd04a5bd7fd4f960b3e4aedaa7ed950f2f891ce16902eb6b"},
+    {file = "google_cloud_audit_log-0.2.5-py2.py3-none-any.whl", hash = "sha256:18b94d4579002a450b7902cd2e8b8fdcb1ea2dd4df3b41f8f82be6d9f7fcd746"},
+]
+
+[package.dependencies]
+googleapis-common-protos = ">=1.56.2,<2.0dev"
+protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
+
+[[package]]
+name = "google-cloud-core"
+version = "2.4.1"
+description = "Google Cloud API client core library"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "google-cloud-core-2.4.1.tar.gz", hash = "sha256:9b7749272a812bde58fff28868d0c5e2f585b82f37e09a1f6ed2d4d10f134073"},
+    {file = "google_cloud_core-2.4.1-py2.py3-none-any.whl", hash = "sha256:a9e6a4422b9ac5c29f79a0ede9485473338e2ce78d91f2370c01e730eab22e61"},
+]
+
+[package.dependencies]
+google-api-core = ">=1.31.6,<2.0.dev0 || >2.3.0,<3.0.0dev"
+google-auth = ">=1.25.0,<3.0dev"
+
+[package.extras]
+grpc = ["grpcio (>=1.38.0,<2.0dev)", "grpcio-status (>=1.38.0,<2.0.dev0)"]
+
+[[package]]
+name = "google-cloud-logging"
+version = "3.9.0"
+description = "Stackdriver Logging API client library"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "google-cloud-logging-3.9.0.tar.gz", hash = "sha256:4decb1b0bed4a0e3c0e58a376646e6002d6be7cad039e3466822e8665072ea33"},
+    {file = "google_cloud_logging-3.9.0-py2.py3-none-any.whl", hash = "sha256:094a2db068ff7f38c9e0c1017673fa49c0768fbae02769e03e06baa30f138b87"},
+]
+
+[package.dependencies]
+google-api-core = {version = ">=1.33.2,<2.0.dev0 || >=2.8.dev0,<3.0.0dev", extras = ["grpc"]}
+google-cloud-appengine-logging = ">=0.1.0,<2.0.0dev"
+google-cloud-audit-log = ">=0.1.0,<1.0.0dev"
+google-cloud-core = ">=2.0.0,<3.0.0dev"
+grpc-google-iam-v1 = ">=0.12.4,<1.0.0dev"
+proto-plus = {version = ">=1.22.2,<2.0.0dev", markers = "python_version >= \"3.11\""}
+protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
+
+[[package]]
+name = "google-cloud-monitoring"
+version = "2.18.0"
+description = "Google Cloud Monitoring API client library"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "google-cloud-monitoring-2.18.0.tar.gz", hash = "sha256:06cc1d7fb75c5e50b54bcc004941ea4b20a7a9f09ed7e6e753514fd8c436096a"},
+    {file = "google_cloud_monitoring-2.18.0-py2.py3-none-any.whl", hash = "sha256:548a1ac0b88c38694e14e1359e89c7eb19b27423906f456bb590f3f0962bb562"},
+]
+
+[package.dependencies]
+google-api-core = {version = ">=1.34.0,<2.0.dev0 || >=2.11.dev0,<3.0.0dev", extras = ["grpc"]}
+proto-plus = ">=1.22.3,<2.0.0dev"
+protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
+
+[package.extras]
+pandas = ["pandas (>=0.23.2)"]
+
+[[package]]
 name = "google-cloud-run"
 version = "0.10.1"
 description = "Google Cloud Run API client library"
@@ -638,4 +726,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "9e55cbb7d536c5b31f7f6ef02826b59ae2a648f5d7079e74b332a1ed5eeaf7a7"
+content-hash = "df893032b6cf949dd77e9e78dd1c951da80494bd425ab973a8ef99b0a50e4502"

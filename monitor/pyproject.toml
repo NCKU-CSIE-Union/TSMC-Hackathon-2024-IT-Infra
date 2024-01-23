@@ -10,6 +10,8 @@ python = "^3.11"
 pre-commit = "^3.6.0"
 ruff = "^0.1.14"
 google-cloud-run = "^0.10.1"
+google-cloud-logging = "^3.9.0"
+google-cloud-monitoring = "^2.18.0"
 
 
 [build-system]
