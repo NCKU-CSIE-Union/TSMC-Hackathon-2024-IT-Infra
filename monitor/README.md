@@ -1,5 +1,11 @@
 # Cloud Run Monitor System
 
+## Setup `gcloud` environment
+
+```bash
+gcloud auth application-default login
+```
+
 ## Reference
 
 ### Cloud Run API
