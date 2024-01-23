@@ -9,3 +9,6 @@ build-linux:
 
 run-docker:
 	docker run --name consumer -d consumer
+
+
+.PHONY: run build-local build-linux run-docker

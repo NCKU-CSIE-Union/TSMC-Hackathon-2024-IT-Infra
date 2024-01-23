@@ -12,10 +12,11 @@ from services.statistics import (
 )
 
 # schemas
-from schema.statistics import HardwareResponse , StatisticsResponse
+from schema.statistics import HardwareResponse, StatisticsResponse
 
 
 router = APIRouter(prefix="/status", tags=["Status"])
+
 
 @router.get("", status_code=status.HTTP_200_OK, response_model=StatisticsResponse)
 async def all_status():

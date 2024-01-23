@@ -4,32 +4,36 @@ from core.config import get_settings
 
 settings = get_settings()
 
+
 def full_cpu_in_duration(duration: int):
     now = time.time()
     print("time", now)
     print(f"full cpu in {duration} seconds")
 
-    i=0
+    i = 0
     while True:
         if time.time() > now + duration:
             break
         i += 1
     print("time", time.time())
 
+
 def create_full_cpu_process(duration: int):
-    '''
+    """
     create 4 process to full cpu in duration seconds
-    '''
+    """
 
     for _ in range(settings.full_cpu_process_count):
         p = multiprocessing.Process(target=full_cpu_in_duration, args=(duration,))
         p.start()
-   
+
 
 """
 refence: 
 https://stackoverflow.com/questions/6317818/eat-memory-using-python
 """
+
+
 def full_ram_in_duration(duration: int):
     now = time.time()
     print("time", now)
@@ -39,7 +43,7 @@ def full_ram_in_duration(duration: int):
     a = bytearray(settings.full_ram_byte)
     while True:
         if time.time() > now + duration:
-            break  
+            break
 
         try:
             a = a + bytearray(settings.full_ram_byte)
@@ -53,6 +57,7 @@ def full_ram_in_duration(duration: int):
     # in GB
     print(f"Allocated {cnt} GB in {duration} seconds")
     print("time", time.time())
+
 
 def create_full_rem_process(duration: int):
     p = multiprocessing.Process(target=full_ram_in_duration, args=(duration,))

@@ -59,4 +59,3 @@ app.include_router(job_router, prefix="/api")
 app.include_router(full_router, prefix="/api")
 app.include_router(status_router, prefix="/api")
 app.include_router(state_router, prefix="/api")
-

@@ -6,6 +6,7 @@ from state.instance import Sleep, Counter, TotalQueryCount, AvgExecutionTime
 
 settings = get_settings()
 
+
 def check_enque():
     return random.randint(0, 1)
 
@@ -25,7 +26,9 @@ def get_deque_num():
 def enqueue(num: int):
     Counter.increase(num)
     TotalQueryCount.increase(num)
-    execution_time = random.randint(settings.execute_lower_bound, settings.execute_upper_bound)
+    execution_time = random.randint(
+        settings.execute_lower_bound, settings.execute_upper_bound
+    )
     AvgExecutionTime.add_time(execution_time, TotalQueryCount.get_count())
 
 
