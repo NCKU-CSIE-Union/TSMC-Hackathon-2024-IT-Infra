@@ -1,4 +1,4 @@
-from .models import CounterModel , TotalQueryCountModel , AvgExecutionTimeModel
+from .models import CounterModel, TotalQueryCountModel, AvgExecutionTimeModel
 
 Counter = CounterModel(0)
 TotalQueryCount = TotalQueryCountModel(0)
