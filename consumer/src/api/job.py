@@ -2,7 +2,7 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
 from services.job import MockBehaviorBackgroundClass
-from state.instance import BackgroundJobSaver
+from state.instance import BackgroundJobSaver , Sleep
 
 router = APIRouter(prefix="/job", tags=["Job"])
 
@@ -48,4 +48,16 @@ async def status_normal_behavior():
             "bg_job_task": str(bg_job.task) if bg_job is not None else None,
             "running": bg_job is not None,
         },
+    )
+
+@router.get("/sleep/{seconds}", status_code=status.HTTP_200_OK)
+async def sleep(seconds: int):
+
+    Sleep.set_sleep_time(seconds)
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "message": f"Sleep time set to {seconds} seconds."
+        }
     )
