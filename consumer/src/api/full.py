@@ -1,6 +1,5 @@
 from fastapi import APIRouter, status, BackgroundTasks
 from fastapi.responses import JSONResponse
-from typing import List
 
 from services.full import create_full_cpu_process, create_full_rem_process
 from services.job import enqueue as enqueue_task
@@ -26,7 +25,7 @@ async def full_cpu(duration: int, background_tasks: BackgroundTasks):
 
 
 @router.get("/ram/duration/{duration}", status_code=status.HTTP_200_OK)
-async def full_cpu(duration: int, background_tasks: BackgroundTasks):
+async def full_ram(duration: int, background_tasks: BackgroundTasks):
     background_tasks.add_task(create_full_rem_process, duration)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
