@@ -26,19 +26,18 @@ middlewares = [
 app = FastAPI(
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
-    redoc_url='/api/redoc',
+    redoc_url="/api/redoc",
     middleware=middlewares,
 )
 
 
 app.include_router(health_router, prefix="")
 app.include_router(full_router, prefix="/api")
-app.include_router(status_router, prefix="/api")
 app.include_router(state_router, prefix="/api")
+app.include_router(status_router, prefix="/api")
 
 
 # add logger middleware
-
 
 
 logger = logging.getLogger(__name__)
