@@ -76,6 +76,9 @@ class AvgExecutionTimeModel:
         """
         avg_time = (avg_time * cnt + time_add) / (cnt + 1)
         """
+        if self.avg_time == 0:
+            self.avg_time = time_add
+            return
         with self.lock:
             self.avg_time = (self.avg_time * last_cnt + time_add) / (last_cnt + 1)
 
