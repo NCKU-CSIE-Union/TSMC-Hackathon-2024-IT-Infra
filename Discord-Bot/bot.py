@@ -3,6 +3,9 @@ import random
 import asyncio
 import os 
 from embed_mess import send_embedded_warning, send_embedded_error,send_embedded_info
+from dotenv import load_dotenv
+load_dotenv()
+DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 last_warning = None
 
@@ -20,10 +23,10 @@ async def on_ready():
     channel = client.get_channel(test_channel_id)
     if channel:
         await send_embedded_warning(channel)
-        await asyncio.sleep(5)
-        await send_embedded_error(channel)
-        await asyncio.sleep(5)
-        await send_embedded_info(channel)
+        # await asyncio.sleep(5)
+        # await send_embedded_error(channel)
+        # await asyncio.sleep(5)
+        # await send_embedded_info(channel)
         
     
 
@@ -52,4 +55,4 @@ async def on_ready():
 #     client.loop.create_task(warning_task())
 
     
-client.run("MTE5OTI3MTYxMzM1OTczOTAxMA.GJN31L.rNSDr17bJ4cMPOsKeLd4jFdS45wZqVGcrDmo6k")
+client.run(DISCORD_BOT_TOKEN)
