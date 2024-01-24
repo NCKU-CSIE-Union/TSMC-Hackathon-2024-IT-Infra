@@ -256,5 +256,44 @@ if __name__ == "__main__":
         run_v2.ServicesClient(), monitoring_v3.MetricServiceClient()
     )
 
-    metric = run_manager.get_metrics("consumer")
-    print(metric)
+    # run_manager.increase_cpu_ram("consumer", cpu_delta=1, ram_delta=69)
+    run_manager.increase_instance_count("consumer", 69)
+
+    # metric = run_manager.get_metrics("consumer")
+    # print(metric)
+    while True:
+        command = input("Enter command: ")
+        if command == "adjust cpu":
+            desired_cpu = random.choice([0.5, 1, 2, 4, 6, 8])
+            desired_ram = random.randint(2000, 10000)
+            print(
+                f"Adjusting CPU to {desired_cpu} and RAM to {desired_ram} for consumer"
+            )
+            print(
+                run_manager.adjust_cpu_ram(
+                    "consumer",
+                    cpu=desired_cpu,
+                    ram=desired_ram,
+                )
+            )
+        elif command == "deploy image":
+            print(
+                run_manager.deploy_image(
+                    "consumer", "gcr.io/tsmccareerhack2024-icsd-grp5/consumer:latest"
+                )
+            )
+        elif command == "scale up":
+            desired_count = random.randint(1, 5)
+            print(f"Scaling instance count to {desired_count} for consumer")
+            res = run_manager.adjust_instance_count("consumer", desired_count)
+            if res is None:
+                print("Failed to scale up")
+            else:
+                print("Successfully scaled up")
+        elif command == "scale down":
+            print("Scaling instance count to 0 for consumer")
+            print(run_manager.adjust_instance_count("consumer", 0))
+        elif command == "exit":
+            break
+        else:
+            logging.warn("Invalid command")
