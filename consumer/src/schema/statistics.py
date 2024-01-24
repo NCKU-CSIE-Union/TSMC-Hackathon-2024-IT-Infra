@@ -11,3 +11,4 @@ class StatisticsResponse(BaseModel):
     mem: HardwareResponse
     remain_count: int
     avg_exe_time: float
+    instance_count: int

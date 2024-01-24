@@ -17,22 +17,13 @@ async def backgound_logging_task():
 
     settings = get_settings()
 
-    logging.basicConfig()
-    logger = logging.getLogger("uvicorn.default")
-    file_handler = logging.handlers.RotatingFileHandler(
-        filename=settings.log_file,
-        maxBytes=settings.log_max_bytes,
-        backupCount=settings.log_backup_count,
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s,%(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    formatter = logging.Formatter(
-        fmt="%(asctime)s,%(message)s",
-        datefmt="%H:%M:%S",
-    )
-
-    file_handler.setFormatter(formatter)
-
-    logger.addHandler(file_handler)
+    logger = logging.getLogger("background")
 
     while True:
         """

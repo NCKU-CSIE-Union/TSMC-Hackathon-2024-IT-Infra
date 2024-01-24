@@ -45,3 +45,13 @@ async def enque(num: int):
         status_code=status.HTTP_200_OK,
         content={"message": f"enque {num}"},
     )
+
+
+@router.get("/error", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+async def error():
+    a = 1 / 0
+    a = a + 1
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"message": "error"},
+    )

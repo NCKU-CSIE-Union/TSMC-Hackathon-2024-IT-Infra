@@ -9,6 +9,7 @@ from services.statistics import (
     get_remain_count,
     get_avg_exe_time,
 )
+from services.job import get_current_instance_count
 
 # schemas
 from schema.statistics import HardwareResponse, StatisticsResponse
@@ -34,6 +35,7 @@ async def all_status():
         mem=HardwareResponse(percent=get_mem_percent(), usage=get_mem_usage()),
         remain_count=get_remain_count(),
         avg_exe_time=get_avg_exe_time(),
+        instance_count=get_current_instance_count(),
     )
 
 
@@ -63,6 +65,11 @@ async def remain_count():
 @router.get("/avg_exe_time", status_code=status.HTTP_200_OK, response_model=float)
 async def avg_exe_time():
     return get_avg_exe_time()
+
+
+@router.get("/instance_count", status_code=status.HTTP_200_OK, response_model=int)
+async def instance_count():
+    return get_current_instance_count()
 
 
 @router.get("/log", status_code=status.HTTP_200_OK)

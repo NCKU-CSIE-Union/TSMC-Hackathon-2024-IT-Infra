@@ -10,11 +10,17 @@ def full_cpu_in_duration(duration: int):
     print("time", now)
     print(f"full cpu in {duration} seconds")
 
-    i = 0
-    while True:
+    n = settings.prime_upper_bound
+    for num in range(2, n + 1):
         if time.time() > now + duration:
             break
-        i += 1
+        prime = True
+        for i in range(2, num):
+            if num % i == 0:
+                prime = False
+        if prime:
+            pass
+
     print("time", time.time())
 
 
