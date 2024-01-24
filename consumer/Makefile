@@ -19,5 +19,8 @@ tag-docker:
 push-docker:
 	docker push us-central1-docker.pkg.dev/tsmccareerhack2024-icsd-grp5/tsmccareerhack2024-icsd-grp5-repository/consumer
 
+deploy:
+	gcloud run deploy consumer --image us-central1-docker.pkg.dev/tsmccareerhack2024-icsd-grp5/tsmccareerhack2024-icsd-grp5-repository/consumer --platform managed --region us-central1 --allow-unauthenticated	
+
 
 .PHONY: run build-local build-linux run-docker auth-docker tag-docker push-docker
