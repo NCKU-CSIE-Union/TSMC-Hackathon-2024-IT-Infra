@@ -3,7 +3,6 @@ from fastapi.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
 # for logging middleware
-import logging
 from fastapi import Request
 import time
 
@@ -13,8 +12,15 @@ from api.state import router as state_router
 from api.status import router as status_router
 from api.job import router as job_router
 
-# backgound livespan task
-# from services.job import backgound_mock_behavior
+from core.config import get_settings
+
+settings = get_settings()
+
+if settings.sentry_dsn:
+    import sentry_sdk
+
+    print("sentry dsn is set")
+    sentry_sdk.init(settings.sentry_dsn)
 
 
 middlewares = [
@@ -36,19 +42,12 @@ app = FastAPI(
 )
 
 
-# add logger middleware
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next: callable):
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
     formatted_process_time = "{0:.4f}".format(process_time)
-    logger.info(f"{request.method} {request.url} {formatted_process_time}s")
     response.headers["X-Process-Time"] = formatted_process_time
     return response
 
