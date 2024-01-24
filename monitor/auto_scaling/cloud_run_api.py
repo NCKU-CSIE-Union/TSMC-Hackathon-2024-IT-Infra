@@ -63,7 +63,7 @@ class CloudRunManager:
             return False
 
     def increase_cpu_ram(
-        self, service_id, cpu_delta: float = 0, ram_delta: float = 0, ram_unit="M"
+        self, service_id, cpu_delta: float = 0, ram_delta: int = 0, ram_unit="M"
     ):
         """
         Adjusts the CPU and RAM of a cloud instance.
@@ -88,16 +88,23 @@ class CloudRunManager:
             except Exception:
                 original_cpu = 0
             try:
-                original_ram = float(
+                original_ram = int(
                     "".join(c for c in original_ram if c.isdigit() or c == ".")
                 )
             except Exception:
                 original_ram = 0
             container.resources = run_v2.ResourceRequirements()
+            new_cpu = (
+                (original_cpu + cpu_delta) > 1 and int(original_cpu + cpu_delta) or 0.5
+            )
+            new_ram = original_ram + ram_delta
             container.resources.limits = {
-                "cpu": f"{original_cpu + cpu_delta}",
-                "memory": f"{original_ram + ram_delta}{ram_unit}",
+                "cpu": f"{new_cpu}",
+                "memory": f"{new_ram}{ram_unit}",
             }
+            print(
+                f"Container {container.name} CPU: {new_cpu}, RAM: {new_ram}{ram_unit}"
+            )
         # Update the service with the modified configuration
         request = run_v2.UpdateServiceRequest(service=current_service)
 
