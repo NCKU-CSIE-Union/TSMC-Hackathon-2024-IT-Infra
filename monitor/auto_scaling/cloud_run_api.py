@@ -1,9 +1,12 @@
+import logging
+import random
 import time
 
 from google.cloud import monitoring_v3, run_v2
 
 project_id = "tsmccareerhack2024-icsd-grp5"
 project_name = f"projects/{project_id}"
+location = "us-central1"
 
 
 class CloudRunManager:
@@ -15,64 +18,176 @@ class CloudRunManager:
         self.cloud_run_client = run_client
         self.monitoring_client = monitoring_client
 
-    def adjust_cpu_ram(self, instance_id, cpu=None, ram=None):
+    def get_service(self, service_id):
+        """
+        Gets the configuration of a cloud run.
+
+        :param service_id: The name of the cloud run which you named it in the create form. (e.g. consumer)
+        """
+        service_name = (
+            f"projects/{project_id}/locations/{location}/services/{service_id}"
+        )
+        return self.cloud_run_client.get_service(name=service_name)
+
+    def adjust_cpu_ram(self, service_id, cpu: float, ram: float, ram_unit="M"):
         """
         Adjusts the CPU and RAM of a cloud instance.
 
-        :param instance_id: ID of the instance to adjust.
+        :param service_id: The name of the cloud run which you named it in the create form. (e.g. consumer)
         :param cpu: New CPU configuration.
         :param ram: New RAM configuration.
+        :param ram_unit (optional): The unit of RAM. (e.g. M, G)
         """
-        # https://github.com/googleapis/google-cloud-python/blob/main/packages/google-cloud-run/google/cloud/run_v2/types/service.py#L502
-        # https://github.com/googleapis/google-cloud-python/blob/main/packages/google-cloud-run/google/cloud/run_v2/types/revision_template.py#L144
-        # https://github.com/googleapis/google-cloud-python/blob/main/packages/google-cloud-run/google/cloud/run_v2/types/k8s_min.py#L164
-        request = run_v2.UpdateServiceRequest(
-            service=run_v2.Service(
-                name=instance_id,
-                template=run_v2.RevisionTemplate(
-                    containers=[
-                        run_v2.Container(
-                            resources=run_v2.ResourceRequirements(
-                                limits={"cpu": cpu, "memory": ram}
-                            )
-                        )
-                    ]
-                ),
-            )
+        service_name = (
+            f"projects/{project_id}/locations/{location}/services/{service_id}"
         )
+        # Retrieve the current configuration of the service
+        current_service = self.cloud_run_client.get_service(name=service_name)
+        # Modify only the resource requirements
+        for container in current_service.template.containers:
+            container.resources = run_v2.ResourceRequirements()
+            container.resources.limits = {
+                "cpu": f"{cpu}",
+                "memory": f"{ram}{ram_unit}",
+            }
+        # Update the service with the modified configuration
+        request = run_v2.UpdateServiceRequest(service=current_service)
 
         operation = self.cloud_run_client.update_service(request=request)
+        print("Updating service with new CPU and RAM ...")
 
-        response = operation.result()  # Blocks until operation is complete
-        return response
+        try:
+            response: run_v2.Service = operation.result(timeout=30)  # noqa: F841
+            return True
+        except Exception:
+            return False
 
-    def adjust_instance_count(self, instance_id, new_count):
+    def increase_cpu_ram(
+        self, service_id, cpu_delta: float = 0, ram_delta: float = 0, ram_unit="M"
+    ):
+        """
+        Adjusts the CPU and RAM of a cloud instance.
+
+        :param service_id: The name of the cloud run which you named it in the create form. (e.g. consumer)
+        :param cpu_delta: The Delta of current CPU configuration. (unit: no unit, number only, e.g. 1, 69, 420)
+        :param ram_delta: The Delta of current RAM configuration. (unit: MB)
+        :param ram_unit (optional): The unit of RAM. (e.g. M, G)
+        """
+        service_name = (
+            f"projects/{project_id}/locations/{location}/services/{service_id}"
+        )
+        current_service = self.cloud_run_client.get_service(name=service_name)
+        # Modify the resource requirements
+        for container in current_service.template.containers:
+            original_cpu = container.resources.limits["cpu"]
+            original_ram = container.resources.limits["memory"]
+            try:
+                original_cpu = float(
+                    "".join(c for c in original_cpu if c.isdigit() or c == ".")
+                )
+            except Exception:
+                original_cpu = 0
+            try:
+                original_ram = float(
+                    "".join(c for c in original_ram if c.isdigit() or c == ".")
+                )
+            except Exception:
+                original_ram = 0
+            container.resources = run_v2.ResourceRequirements()
+            container.resources.limits = {
+                "cpu": f"{original_cpu + cpu_delta}",
+                "memory": f"{original_ram + ram_delta}{ram_unit}",
+            }
+        # Update the service with the modified configuration
+        request = run_v2.UpdateServiceRequest(service=current_service)
+
+        # Wait for the operation to complete
+        operation = self.cloud_run_client.update_service(request=request)
+        print("Updating service with new CPU and RAM ...")
+
+        try:
+            response: run_v2.Service = operation.result(timeout=30)  # noqa: F841
+            return True
+        except Exception:
+            return False
+
+    def adjust_instance_count(self, service_id: str, new_count: int):
         """
         Adjusts the number of running instances.
 
+        :param service_id: The name of the cloud run which you named it in the create form. (e.g. consumer)
         :param new_count: The target number of instances.
         """
-        # https://github.com/googleapis/google-cloud-python/blob/main/packages/google-cloud-run/google/cloud/run_v2/types/service.py#L502
-        # https://github.com/googleapis/google-cloud-python/blob/main/packages/google-cloud-run/google/cloud/run_v2/types/revision_template.py#L33
-        # https://github.com/googleapis/google-cloud-python/blob/313f5672c1d16681dd4db2c4a995c5668259ea7d/packages/google-cloud-run/google/cloud/run_v2/types/vendor_settings.py#L213
-        request = run_v2.UpdateServiceRequest(
-            service=run_v2.Service(
-                name=instance_id,
-                template=run_v2.RevisionTemplate(
-                    scale=run_v2.RevisionScaling(
-                        min_instance_count=new_count, max_instance_count=new_count
-                    )
-                ),
-            )
+
+        service_name = (
+            f"projects/{project_id}/locations/{location}/services/{service_id}"
         )
+        # Retrieve the current configuration of the service
+        current_service = self.cloud_run_client.get_service(name=service_name)
+
+        # Modify only the scaling parameters
+        current_service.template.scaling.min_instance_count = new_count
+        current_service.template.scaling.max_instance_count = new_count
+
+        for container in current_service.template.containers:
+            container.env = [
+                run_v2.EnvVar(
+                    name="CURRENT_INSTANCE_COUNT",
+                    value=f"{new_count}",
+                ),
+            ]
+        request = run_v2.UpdateServiceRequest(service=current_service)
 
         operation = self.cloud_run_client.update_service(request=request)
+        print(f"Updating service with new instance count: {new_count} ...")
+        try:
+            response: run_v2.Service = operation.result(  # noqa: F841
+                timeout=30
+            )  # Blocks until operation is complete
+            return True
 
-        response = operation.result()  # Blocks until operation is complete
-        return response
+        except Exception:
+            return False
+
+    def increase_instance_count(self, service_id: str, delta: int):
+        """
+        Adjusts the number of running instances.
+
+        :param service_id: The name of the cloud run which you named it in the create form. (e.g. consumer)
+        :param delta: The delta of the number of instances.
+        """
+
+        service_name = (
+            f"projects/{project_id}/locations/{location}/services/{service_id}"
+        )
+        # Retrieve the current configuration of the service
+        current_service = self.cloud_run_client.get_service(name=service_name)
+        new_count = current_service.template.scaling.min_instance_count + delta
+        # Modify only the scaling parameters
+        current_service.template.scaling.min_instance_count = new_count
+        current_service.template.scaling.max_instance_count = new_count
+
+        for container in current_service.template.containers:
+            container.env = [
+                run_v2.EnvVar(
+                    name="CURRENT_INSTANCE_COUNT",
+                    value=f"{current_service.template.scaling.min_instance_count}",
+                ),
+            ]
+        request = run_v2.UpdateServiceRequest(service=current_service)
+
+        operation = self.cloud_run_client.update_service(request=request)
+        print(f"Updating service with new instance count: {new_count} ...")
+        try:
+            response: run_v2.Service = operation.result(  # noqa: F841
+                timeout=30
+            )  # Blocks until operation is complete
+            return True
+
+        except Exception:
+            return False
 
     def deploy_image(self, drone_id, image):
-        # self.client.
         """
         Deploys a new image to a cloud run.
 
