@@ -13,6 +13,15 @@ from api.state import router as state_router
 from api.status import router as status_router
 from api.job import router as job_router
 
+from core.config import get_settings
+
+settings = get_settings()
+
+if settings.sentry_dsn:
+    import sentry_sdk
+
+    sentry_sdk.init(settings.sentry_dsn)
+
 # backgound livespan task
 # from services.job import backgound_mock_behavior
 

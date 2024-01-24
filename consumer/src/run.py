@@ -1,7 +1,5 @@
 import argparse
 import os
-
-from dotenv import load_dotenv
 import uvicorn
 
 if __name__ == "__main__":
@@ -24,6 +22,8 @@ if __name__ == "__main__":
 
     if args.dev:
         # for development mode
+        from dotenv import load_dotenv
+
         load_dotenv(".env/dev.env")
 
     uvicorn.run(
