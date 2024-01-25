@@ -1,7 +1,7 @@
 import os
+
 from dotenv import load_dotenv
-from google.cloud import logging
-from google.cloud.logging_v2 import LogEntry
+from google.cloud import logging_v2
 
 load_dotenv(".env/dev.env")
 
@@ -15,7 +15,7 @@ access_token = os.getenv("ACCESS_TOKEN")
 
 
 def get_cloud_run_logs(service_name):
-    client = logging.Client()
+    client = logging_v2.Client()
     logger = client.logger(service_name)
     logs = logger.list_entries()
 
@@ -42,7 +42,7 @@ def list_all_log_entries():
         "projects/tsmccareerhack2024-icsd-grp5/logs/run.googleapis.com%2Fstderr"
     )
 
-    logging_client = logging.Client()
+    logging_client = logging_v2.Client()
     logger = logging_client.logger(logger_name)
 
     print("Listing entries for logger {}:".format(logger.name))
@@ -79,7 +79,7 @@ def get_enque_deque_log():
     pass
 
 
-def tail_log_entry():
+def tail_log_entry(service_name):
     """
     resource.type="cloud_run_revision"
     resource.labels.revision_name="consumer-sentry-00004-864"
@@ -88,23 +88,22 @@ def tail_log_entry():
     logName="projects/tsmccareerhack2024-icsd-grp5/logs/run.googleapis.com%2Fstderr"
     """
 
-    client = logging.Client()
+    client = logging_v2.Client()
     logger_name = "run.googleapis.com%2Fstderr"
     logger = client.logger(logger_name)
 
     resource_type = '"cloud_run_revision"'
-    revision_name = '"consumer-sentry-00004-864"'
-    service_name = '"consumer-sentry"'
+    # revision_name = '"consumer-sentry-00004-864"'
     severity = '"DEFAULT"'
 
-    query: LogEntry = logger.list_entries(
-        filter_=f"resource.type={resource_type} AND resource.labels.revision_name={revision_name} AND resource.labels.service_name={service_name} AND severity={severity}",
+    query: logging_v2.LogEntry = logger.list_entries(
+        filter_=f"resource.type={resource_type} AND resource.labels.service_name={service_name}",
         max_results=10,
-        order_by=logging.DESCENDING,
+        order_by=logging_v2.DESCENDING,
     )
 
     for entry in query:
-        print(entry.payload)
+        yield f"{entry.timestamp} {entry.payload}"
 
 
 # REST API
