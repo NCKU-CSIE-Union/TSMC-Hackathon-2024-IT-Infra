@@ -185,24 +185,18 @@ class CloudRunManager:
         except Exception:
             return False
 
-    def deploy_image(self, drone_id, image):
+    def deploy_image(self, service_id, image):
         """
         Deploys a new image to a cloud run.
 
         :param image: The new image to deploy.
         """
-        request = run_v2.UpdateServiceRequest(
-            service=run_v2.Service(
-                name=drone_id,
-                template=run_v2.RevisionTemplate(
-                    containers=[
-                        run_v2.Container(
-                            image=image,
-                        )
-                    ]
-                ),
-            )
-        )
+        # Retrieve the current configuration of the service
+        service_name = f"projects/{self.project_id}/locations/{self.location}/services/{service_id}"
+        current_service = self.cloud_run_client.get_service(name=service_name)
+
+        current_service.template.containers[0].image = image
+        request = run_v2.UpdateServiceRequest(service=current_service)
 
         operation = self.cloud_run_client.update_service(request=request)
 
