@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - dev
+      - feature/**
+      - feat/**
 
 jobs:
   test:
