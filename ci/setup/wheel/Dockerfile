@@ -3,10 +3,7 @@ FROM python:3.11-slim-buster
 # Set the working directory to /app
 WORKDIR /app
 
-# RUN apt-get update && apt-get install -y \
-#     python3-dev \
-#     && rm -rf /var/lib/apt/lists/*
-# Copy the current directory contents into the container at /app
+
 COPY ./requirements.txt /app/requirements.txt
 
 # Install any needed packages specified in requirements.txt
