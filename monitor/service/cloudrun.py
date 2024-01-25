@@ -1,8 +1,11 @@
+import datetime
 import logging
 import random
 import time
 
+import pandas as pd
 from google.cloud import monitoring_v3, run_v2
+from pydantic import BaseModel
 
 
 class CloudRunManager:
@@ -205,34 +208,81 @@ class CloudRunManager:
 
     def get_metrics(
         self,
-        instance_name,
+        service_id: str,
         start_time=int(time.time() - 60 * 60 * 3),
         end_time=int(time.time()),
     ):
-        """
-        Gets the metrics of a cloud run.
+        # TODO: Add Request Count (1xx),Request Count (2xx),Request Count (3xx),Request Count (4xx)
+        # TODO: Request Latency (ms)
+        class MetricReflectName(BaseModel):
+            class Config:
+                arbitrary_types_allowed = True
 
-        :param drone_id: The ID of the cloud run.
-        """
+            column_name: str
+            metric_name: str
+            aggregation: monitoring_v3.Aggregation = monitoring_v3.Aggregation(
+                alignment_period={"seconds": 60},
+                per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_DELTA,
+                cross_series_reducer=monitoring_v3.Aggregation.Reducer.REDUCE_MEAN,
+            )
 
-        # TODO: currently only gets CPU utilization, add more metrics
-        return self.monitoring_client.list_time_series(
-            request=monitoring_v3.ListTimeSeriesRequest(
-                name=f"projects/{self.project_id}",
-                filter=f'metric.type="run.googleapis.com/container/cpu/utilizations" AND resource.label."configuration_name"="{instance_name}"',
+        metric_filters = [
+            MetricReflectName(
+                column_name="Container CPU Utilization (%)",
+                metric_name="run.googleapis.com/container/cpu/utilizations",
+            ),
+            MetricReflectName(
+                column_name="Container Memory Utilization (%)",
+                metric_name="run.googleapis.com/container/memory/utilizations",
+            ),
+            MetricReflectName(
+                column_name="Instance Count",
+                metric_name="run.googleapis.com/container/instance_count",
                 aggregation=monitoring_v3.Aggregation(
                     alignment_period={"seconds": 60},
-                    per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_DELTA,
-                    cross_series_reducer=monitoring_v3.Aggregation.Reducer.REDUCE_MEAN,
-                ),
-                interval=monitoring_v3.TimeInterval(
-                    {
-                        "start_time": {"seconds": int(start_time)},
-                        "end_time": {"seconds": int(end_time)},
-                    }
+                    per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_NONE,
+                    cross_series_reducer=monitoring_v3.Aggregation.Reducer.REDUCE_NONE,
                 ),
             ),
-        )
+        ]
+        data = []
+        for metric in metric_filters:
+            # print(f"Getting metric: {metric.metric_name}")
+            response = self.monitoring_client.list_time_series(
+                request=monitoring_v3.ListTimeSeriesRequest(
+                    name=f"projects/{self.project_id}",
+                    filter=f'metric.type="{metric.metric_name}" AND resource.label."configuration_name"="{service_id}"',
+                    aggregation=metric.aggregation,
+                    interval=monitoring_v3.TimeInterval(
+                        {
+                            "start_time": {"seconds": int(start_time)},
+                            "end_time": {"seconds": int(end_time)},
+                        }
+                    ),
+                ),
+            )
+            for series in response:
+                for point in series.points:
+                    if "Instance Count" in metric.column_name:
+                        metric.column_name = (
+                            f"Instance Count ({series.metric.labels['state']})"
+                        )
+                    data.append(
+                        {
+                            "Time": datetime.datetime.fromtimestamp(
+                                point.interval.end_time.timestamp()
+                            ),
+                            metric.column_name: point.value.double_value,
+                        }
+                    )
+
+        metric_df: pd.DataFrame = pd.DataFrame(data)
+        metric_df = metric_df.groupby("Time").first().reset_index()
+        metric_df = metric_df.sort_values(by="Time", ascending=True)
+        metric_df.set_index("Time", inplace=True)
+        metric_df = metric_df.interpolate(method="time")
+
+        return metric_df
 
 
 if __name__ == "__main__":
@@ -247,9 +297,11 @@ if __name__ == "__main__":
     )
 
     # run_manager.increase_cpu_ram("consumer", cpu_delta=1, ram_delta=69)
-    run_manager.increase_instance_count("consumer", 69)
+    # run_manager.increase_instance_count("consumer", 69)
 
-    # metric = run_manager.get_metrics("consumer")
+    metric = run_manager.get_metrics("consumer-latest")
+    print(metric)
+    exit()
     # print(metric)
     while True:
         command = input("Enter command: ")
