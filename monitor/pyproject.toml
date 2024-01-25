@@ -13,6 +13,7 @@ google-cloud-run = "^0.10.1"
 google-cloud-logging = "^3.9.0"
 google-cloud-monitoring = "^2.18.0"
 python-dotenv = "^1.0.1"
+discord-py = "^2.3.2"
 
 
 [build-system]
