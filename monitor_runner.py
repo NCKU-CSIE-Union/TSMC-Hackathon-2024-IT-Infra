@@ -1,4 +1,6 @@
+import asyncio
 import re
+import threading
 import time
 
 import pandas as pd
@@ -10,6 +12,7 @@ from ai.analyze import (  # noqa: F401
     analyze_mem_usage,
     analyze_restart,
 )
+from bot.bot import broadcast, client, run_bot
 from monitor.service import cloudrun, log
 
 cloudrun.CloudRunManager()
@@ -36,9 +39,13 @@ def parser(line):
         return df
 
 
-if __name__ == "__main__":
+async def main():
     print("Running monitor runner...")
-    logDF = pd.DataFrame()
+    logDF: pd.DataFrame = pd.DataFrame()
+    bot_thread = threading.Thread(target=run_bot)
+    bot_thread.start()
+    # loop = asyncio.get_event_loop()
+    # asyncio.run_coroutine_threadsafe(broadcast("hello"), loop)
     while True:
         for log_line in log.tail_log_entry(service_name="consumer-sentry"):
             # print(log)
@@ -47,6 +54,18 @@ if __name__ == "__main__":
             logDF = pd.concat([logDF, parse_df], ignore_index=True)
             with open("log_data.csv", "w") as f:
                 logDF.to_csv(f, index=False)
-            # analyze_by_llm(logDF) #TODO: fix: if key not exist, ignore that key
+            # result = analyze_by_llm(logDF) #TODO: fix: if key not exist, ignore that key
+            result = {
+                "severity": "WARNING",  # ERROR, WARNING or INFO
+                "message": "Lets make love tonight",
+            }
+            print(result)
+            asyncio.run_coroutine_threadsafe(
+                broadcast(message_dict=result), client.loop
+            )
+            # await broadcast(result)
         # analyze_by_llm()
         time.sleep(10)
+
+
+asyncio.run(main())
