@@ -4,19 +4,20 @@ import time
 
 from google.cloud import monitoring_v3, run_v2
 
-project_id = "tsmccareerhack2024-icsd-grp5"
-project_name = f"projects/{project_id}"
-location = "us-central1"
-
 
 class CloudRunManager:
     def __init__(
         self,
         run_client: run_v2.ServicesClient,
         monitoring_client: monitoring_v3.MetricServiceClient,
+        project_id="tsmccareerhack2024-icsd-grp5",
+        location="us-central1",
     ):
         self.cloud_run_client = run_client
         self.monitoring_client = monitoring_client
+        self.project_id = project_id
+        self.project_name = f"projects/{project_id}"
+        self.location = location
 
     def get_service(self, service_id):
         """
@@ -24,9 +25,7 @@ class CloudRunManager:
 
         :param service_id: The name of the cloud run which you named it in the create form. (e.g. consumer)
         """
-        service_name = (
-            f"projects/{project_id}/locations/{location}/services/{service_id}"
-        )
+        service_name = f"projects/{self.project_id}/locations/{self.location}/services/{service_id}"
         return self.cloud_run_client.get_service(name=service_name)
 
     def adjust_cpu_ram(self, service_id, cpu: float, ram: float, ram_unit="M"):
@@ -38,9 +37,7 @@ class CloudRunManager:
         :param ram: New RAM configuration.
         :param ram_unit (optional): The unit of RAM. (e.g. M, G)
         """
-        service_name = (
-            f"projects/{project_id}/locations/{location}/services/{service_id}"
-        )
+        service_name = f"projects/{self.project_id}/locations/{self.location}/services/{service_id}"
         # Retrieve the current configuration of the service
         current_service = self.cloud_run_client.get_service(name=service_name)
         # Modify only the resource requirements
@@ -73,9 +70,7 @@ class CloudRunManager:
         :param ram_delta: The Delta of current RAM configuration. (unit: MB)
         :param ram_unit (optional): The unit of RAM. (e.g. M, G)
         """
-        service_name = (
-            f"projects/{project_id}/locations/{location}/services/{service_id}"
-        )
+        service_name = f"projects/{self.project_id}/locations/{self.location}/services/{service_id}"
         current_service = self.cloud_run_client.get_service(name=service_name)
         # Modify the resource requirements
         for container in current_service.template.containers:
@@ -126,9 +121,7 @@ class CloudRunManager:
         :param new_count: The target number of instances.
         """
 
-        service_name = (
-            f"projects/{project_id}/locations/{location}/services/{service_id}"
-        )
+        service_name = f"projects/{self.project_id}/locations/{self.location}/services/{service_id}"
         # Retrieve the current configuration of the service
         current_service = self.cloud_run_client.get_service(name=service_name)
 
@@ -164,9 +157,7 @@ class CloudRunManager:
         :param delta: The delta of the number of instances.
         """
 
-        service_name = (
-            f"projects/{project_id}/locations/{location}/services/{service_id}"
-        )
+        service_name = f"projects/{self.project_id}/locations/{self.location}/services/{service_id}"
         # Retrieve the current configuration of the service
         current_service = self.cloud_run_client.get_service(name=service_name)
         new_count = current_service.template.scaling.min_instance_count + delta
@@ -233,7 +224,7 @@ class CloudRunManager:
         # TODO: currently only gets CPU utilization, add more metrics
         return self.monitoring_client.list_time_series(
             request=monitoring_v3.ListTimeSeriesRequest(
-                name=f"projects/{project_id}",
+                name=f"projects/{self.project_id}",
                 filter=f'metric.type="run.googleapis.com/container/cpu/utilizations" AND resource.label."configuration_name"="{instance_name}"',
                 aggregation=monitoring_v3.Aggregation(
                     alignment_period={"seconds": 60},
@@ -251,9 +242,14 @@ class CloudRunManager:
 
 
 if __name__ == "__main__":
+    project_id = "tsmccareerhack2024-icsd-grp5"
+    location = "us-central1"
     monitoring_client = monitoring_v3.MetricServiceClient()
     run_manager = CloudRunManager(
-        run_v2.ServicesClient(), monitoring_v3.MetricServiceClient()
+        run_client=run_v2.ServicesClient(),
+        monitoring_client=monitoring_v3.MetricServiceClient(),
+        project_id=project_id,
+        location=location,
     )
 
     # run_manager.increase_cpu_ram("consumer", cpu_delta=1, ram_delta=69)
