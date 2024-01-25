@@ -1,5 +1,6 @@
 import discord
 
+
 async def send_embedded_warning(channel):
     # 創建一個 Embed 對象
     embed = discord.Embed(
@@ -23,7 +24,12 @@ async def send_embedded_warning(channel):
     # 設置腳註
     embed.set_footer(text = "Warning Message by your system buddy")
 
-    await channel.send(embed = embed)
+    message = await channel.send(embed = embed)
+    
+    # 創建討論串
+    from feedback import create_thread
+    await create_thread(message)
+
     
 
 async def send_embedded_error(channel):

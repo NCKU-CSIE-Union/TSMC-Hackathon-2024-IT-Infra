@@ -2,12 +2,14 @@ import discord
 import random
 import asyncio
 import os 
-from embed_mess import send_embedded_warning, send_embedded_error,send_embedded_info
+from message import send_embedded_warning, send_embedded_error,send_embedded_info
+from feedback import get_active_threads, process_feedback
 from dotenv import load_dotenv
 load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 last_warning = None
+active_threads = []
 
 # 權限設置
 intents = discord.Intents.default()
@@ -16,18 +18,32 @@ intents.message_content = True
 
 client = discord.Client(intents = intents)
 
+async def update_active_threads():
+    global active_threads
+    active_threads = await get_active_threads()
+
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
     test_channel_id = 1199372364870340810  
     channel = client.get_channel(test_channel_id)
+    client.loop.create_task(update_active_threads())
     if channel:
         await send_embedded_warning(channel)
         # await asyncio.sleep(5)
         # await send_embedded_error(channel)
         # await asyncio.sleep(5)
         # await send_embedded_info(channel)
-        
+
+# 監聽討論串訊息
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    
+    for thread in active_threads:
+        if message.channel.id == thread.id:
+            await process_feedback(message, thread)
     
 
 # 測試 function
