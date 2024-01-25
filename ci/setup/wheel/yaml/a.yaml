@@ -2,13 +2,13 @@ name: Yaml A
 steps:
   - name: Stop current container
     commands:
-      - docker stop hello-world
+      - sudo docker stop hello-world
   - name: Remove current container
     commands:
-      - docker rm hello-world
+      - sudo docker rm hello-world
   - name: Pull current image
     commands:
-      - docker pull hello-world
+      - sudo docker pull hello-world
   - name: Run new container
     commands:
-      - docker run -d --name hello-world -p 80:80 hello-world
+      - sudo docker run -d --name hello-world -p 80:80 hello-world
