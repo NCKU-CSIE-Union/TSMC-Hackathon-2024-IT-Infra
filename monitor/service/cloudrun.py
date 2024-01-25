@@ -279,6 +279,16 @@ class CloudRunManager:
         metric_df: pd.DataFrame = pd.DataFrame(data)
         metric_df = metric_df.groupby("Time").first().reset_index()
         metric_df = metric_df.sort_values(by="Time", ascending=True)
+
+        # convert to percentage
+        metric_df["Container CPU Utilization (%)"] = (
+            metric_df["Container CPU Utilization (%)"] * 100
+        )
+        metric_df["Container Memory Utilization (%)"] = (
+            metric_df["Container Memory Utilization (%)"] * 100
+        )
+
+        # fill missing columns with time interpolation
         metric_df.set_index("Time", inplace=True)
         metric_df = metric_df.interpolate(method="time")
 
