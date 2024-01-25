@@ -30,10 +30,10 @@ async def on_ready():
     client.loop.create_task(update_active_threads())
     if channel:
         await send_embedded_warning(channel)
-        # await asyncio.sleep(5)
-        # await send_embedded_error(channel)
-        # await asyncio.sleep(5)
-        # await send_embedded_info(channel)
+        await asyncio.sleep(5)
+        await send_embedded_error(channel)
+        await asyncio.sleep(5)
+        await send_embedded_info(channel)
 
 # 監聽討論串訊息
 @client.event
