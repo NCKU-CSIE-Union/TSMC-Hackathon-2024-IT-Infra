@@ -5,12 +5,8 @@ import time
 
 import pandas as pd
 
-from ai.analyze import (  # noqa: F401
+from ai.analyze import (
     analyze_by_llm,
-    analyze_cpu_usage,
-    analyze_instance_count,
-    analyze_mem_usage,
-    analyze_restart,
 )
 from bot.bot import broadcast, client, run_bot
 from monitor.service import cloudrun, log
@@ -39,32 +35,41 @@ def parser(line):
         return df
 
 
+def fill_missing_columns(metric_df) -> pd.DataFrame:
+    columns_to_fill = [
+        "Instance Count (active)",
+        "Instance Count (idle)",
+        "Container CPU Utilization (%)",
+        "Container Memory Utilization (%)",
+        "Container Startup Latency (ms)",
+        "Response Count (4xx)",
+        "Response Count (5xx)",
+    ]
+
+    for column in columns_to_fill:
+        if column not in metric_df.columns:
+            metric_df[column] = 0
+
+    metric_df["Time"] = metric_df["time"]
+
+    return metric_df
+
+
 async def main():
     print("Running monitor runner...")
     logDF: pd.DataFrame = pd.DataFrame()
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.start()
-    # loop = asyncio.get_event_loop()
-    # asyncio.run_coroutine_threadsafe(broadcast("hello"), loop)
     while True:
         for log_line in log.tail_log_entry(service_name="consumer-sentry"):
-            # print(log)
-            # print("separator")
             parse_df = parser(log_line)
             logDF = pd.concat([logDF, parse_df], ignore_index=True)
             with open("log_data.csv", "w") as f:
                 logDF.to_csv(f, index=False)
-            # result = analyze_by_llm(logDF) #TODO: fix: if key not exist, ignore that key
-            result = {
-                "severity": "WARNING",  # ERROR, WARNING or INFO
-                "message": "Lets make love tonight",
-            }
-            print(result)
+            result = analyze_by_llm(fill_missing_columns(logDF))
             asyncio.run_coroutine_threadsafe(
                 broadcast(message_dict=result), client.loop
             )
-            # await broadcast(result)
-        # analyze_by_llm()
         time.sleep(10)
 
 
