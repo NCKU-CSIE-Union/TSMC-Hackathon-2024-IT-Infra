@@ -19,8 +19,10 @@ settings = get_settings()
 if settings.sentry_dsn:
     import sentry_sdk
 
-    print("sentry dsn is set")
     sentry_sdk.init(settings.sentry_dsn)
+
+# backgound livespan task
+# from services.job import backgound_mock_behavior
 
 
 middlewares = [

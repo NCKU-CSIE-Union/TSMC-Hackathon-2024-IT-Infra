@@ -20,4 +20,4 @@ COPY . /app/
 EXPOSE 80
 
 # Run app.py when the container launches
-CMD ["python", "src/run.py", "--dev"]
+CMD ["python", "src/run.py", "--prod"]
