@@ -8,8 +8,8 @@ from google.cloud import monitoring_v3, run_v2
 class CloudRunManager:
     def __init__(
         self,
-        run_client: run_v2.ServicesClient,
-        monitoring_client: monitoring_v3.MetricServiceClient,
+        run_client: run_v2.ServicesClient = run_v2.ServicesClient(),
+        monitoring_client: monitoring_v3.MetricServiceClient = monitoring_v3.MetricServiceClient(),
         project_id="tsmccareerhack2024-icsd-grp5",
         location="us-central1",
     ):
