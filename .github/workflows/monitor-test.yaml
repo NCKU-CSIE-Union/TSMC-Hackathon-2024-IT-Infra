@@ -1,0 +1,56 @@
+name: Pytest with pytest-cov
+
+on:
+  push:
+    branches:
+      - feature/consumer
+      - testing/monitor
+    tags:
+      - '*' 
+
+  pull_request:
+    branches:
+      - feature/consumer
+      - testing/monitor
+
+  
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auth with Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}' 
+
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+          cache: 'poetry'
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Run Monitor Tests
+        run: poetry run coverage run -m pytest monitor/tests/test_cloud_run_manager.py
+
+      - name: Generate Coverage Report Summary
+        run: poetry run coverage -m
+
+      - name: Generate Coverage HTML Report
+        run: poetry run coverage html
+      
+      - name: Deploy Coverage To Github Page
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: test/report
+          publish_dir: ./htmlcov
+          destination_dir: monitor

@@ -78,12 +78,33 @@ def analyze_instance_count(metric_df) -> str:
     return feedback
 
 
+def analyze_fail_response(metric_df: pd.DataFrame) -> str:
+    feedback = ""
+    failed_response_count = 0
+    for _, row in metric_df.iterrows():
+        if pd.isna(row["Request Count (4xx)"]):
+            continue
+
+        failed_response_count += row["Request Count (4xx)"]
+        if row["Request Count (4xx)"] > 0:
+            feedback += f"\
+- ERROR: Failed response detected at {row['Time']}, with Request Count (4xx) of {int(row['Request Count (4xx)'])}\n"
+
+    if failed_response_count == 0:
+        feedback = f"- INFO: No failed response detected over the last {len(metric_df)} minutes.\n"
+    else:
+        feedback += f"- ERROR: Failed response detected {int(failed_response_count)} times over the last {len(metric_df)} minutes.\n"
+
+    return feedback
+
+
 def analyze_by_rule(metric_df: pd.DataFrame) -> str:
     feedback = ""
     feedback += analyze_cpu_usage(metric_df)
     feedback += analyze_mem_usage(metric_df)
     feedback += analyze_restart(metric_df)
     feedback += analyze_instance_count(metric_df)
+    feedback += analyze_fail_response(metric_df)
 
     return feedback
 
@@ -100,7 +121,7 @@ Use "ERROR" if the analysis detects errors, "WARNING" for potential issues, or "
     )
     message_schema = ResponseSchema(
         name="message",
-        description="In-depth analysis feedback based on provided metrics(The description can span multiple lines, use '\\n' to separate lines.)",
+        description="In-depth analysis feedback in markdown format based on provided metrics(The description can span multiple lines and should be well formatted, use '\\n' to separate lines.)",
     )
     response_schema = [severity_schema, message_schema]
     output_parser = StructuredOutputParser.from_response_schemas(response_schema)
@@ -109,16 +130,24 @@ Use "ERROR" if the analysis detects errors, "WARNING" for potential issues, or "
     # Define the model and prompt template
     llm = VertexAI(
         model_name="text-bison@001",
-        temperature=0,
-        max_output_tokens=512,
-        top_p=0.8,
-        top_k=40,
+        temperature=0.5,
+        max_output_tokens=1024,
+        top_p=0.9,
+        top_k=0,
     )
     prompt_template = PromptTemplate.from_template(
         """\
 The following text contains metric data for a Google Cloud Run application. \
 This data is presented in CSV format and encompasses the most recent {time_span} minutes:
 {metric_data}
+
+The metric data collected are as follows:
+- Time: The time at which the metric data was collected.
+- Container CPU Utilization (%): Container CPU utilization distribution across all container instances. Sampled every 60 seconds. After sampling, data is not visible for up to 60 seconds.
+- Container Memory Utilization (%): Container memory utilization distribution across all container instances. Sampled every 60 seconds. After sampling, data is not visible for up to 60 seconds.
+- Container Startup Latency (ms): Distribution of time spent starting a new container instance in milliseconds. Sampled every 60 seconds. After sampling, data is not visible for up to 180 seconds.
+- Instance count: Number of container instances that exist, broken down by state. Sampled every 60 seconds. After sampling, data is not visible for up to 120 seconds. state: Whether a container is "active" or "idle".
+- Request Count: Number of requests reaching the revision. Excludes requests that are not reaching your container instances (for example, unauthorized requests or when maximum number of instances is reached). Captured at the end of the request lifecycle. Sampled every 60 seconds. After sampling, data is not visible for up to 180 seconds.
 
 The following text is a heuristic analysis feedback of the metric data:
 {heuristic_feedback}
@@ -130,9 +159,12 @@ The heuristic analysis feedback is based on the following rules:
 - Instance count > 2
 - Fail response (4xx, 5xx)
 
-Based on the provided metrics, an in-depth \
-analysis is required to evaluate the cloud resource status and the operational health of the system. The analysis \
-should identify and report any errors, anticipate potential problems, and propose appropriate remediation strategies.
+Provide a more in-depth analysis feedback based on the provided metric data and heuristic analysis feedback. \
+The analysis should include the following information:
+- Detailed summary of all the errors and potential problems.
+- Potential cause of the error.
+- Anticipate potential problems based on the metric data.
+- Suggestions on how to fix the error.
 
 {format_instruction}
 """
@@ -151,4 +183,9 @@ should identify and report any errors, anticipate potential problems, and propos
 
     # Parse the feedback to a dictionary
     feedback_dict = output_parser.parse(feedback)
+
+    # Add the metric dataframe and timestamp to the feedback dictionary
+    feedback_dict["metric_dataframe"] = metric_df
+    feedback_dict["timestamp"] = metric_df.iloc[-1]["Time"]
+
     return feedback_dict

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tsmc-hackathon-2024-it-infra"
+name = "tsmc-hackathon-2024-it-infra-root"
 version = "0.1.0"
 description = "TSMC hackathon 2024 IT Infor Group"
 authors = ["jason810496 <810496@email.wlsh.tyc.edu.tw>"]
@@ -19,6 +19,9 @@ langchain = "0.1.3"
 pandas = "2.2.0"
 langchain-google-vertexai = "0.0.2"
 pyarrow = "^15.0.0"
+redis = "^5.0.1"
+pytest = "^7.4.4"
+coverage = "^7.4.0"
 
 
 [build-system]

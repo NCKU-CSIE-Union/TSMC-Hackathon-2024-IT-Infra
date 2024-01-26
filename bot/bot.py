@@ -1,11 +1,10 @@
-import asyncio
 import os
 
 import discord
 from dotenv import load_dotenv
 
-from feedback import get_active_threads, process_feedback
-from message import send_embedded_message
+from .feedback import get_active_threads, process_feedback
+from .message import send_embedded_message
 
 load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
@@ -33,6 +32,7 @@ test_info = {
 }
 
 
+
 async def update_active_threads():
     global active_threads
     active_threads = await get_active_threads()
@@ -41,14 +41,15 @@ async def update_active_threads():
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
-    channel = client.get_channel(DISCORD_DST_CHANNEL_ID)
-    client.loop.create_task(update_active_threads())
-    if channel:
-        await send_embedded_message(channel, test_info)
-        # await asyncio.sleep(5)
-        # await send_embedded_error(channel)
-        # await asyncio.sleep(5)
-        # await send_embedded_info(channel)
+    # channel = client.get_channel(DISCORD_DST_CHANNEL_ID)
+    # client.loop.create_task(update_active_threads())
+    # if channel:
+    #     await send_embedded_message(channel, test_info)
+
+    # await asyncio.sleep(5)
+    # await send_embedded_error(channel)
+    # await asyncio.sleep(5)
+    # await send_embedded_info(channel)
 
 
 # 監聽討論串訊息
@@ -62,21 +63,20 @@ async def on_message(message):
             await process_feedback(message, thread)
 
 
-# async def broadcast(message_dict: dict):
-#     print("broadcasting")
-#     test_channel_id = 1199372364870340810
-#     channel = client.get_channel(test_channel_id)
-#     if channel:
-#         try:
-#             await send_embedded_warning(channel, message_dict["message"])
-#         except Exception as e:
-#             print("Error sending warning message:", e)
-#         await asyncio.sleep(5)
+async def send_alert(message_dict: dict):
+    print("broadcasting")
+    test_channel_id = DISCORD_DST_CHANNEL_ID
+    channel = client.get_channel(test_channel_id)
+    if channel:
+        try:
+            await send_embedded_message(channel, message_dict)
+        except Exception as e:
+            print("Error sending warning message:", e)
 
 
-# def run_bot():
-#     print("TSMC System Bot is Online!")
-#     client.run(DISCORD_BOT_TOKEN)
+def run_bot():
+    # print("TSMC System Bot is Online!")
+    client.run(DISCORD_BOT_TOKEN)
 
 
 # 測試 function
@@ -104,4 +104,4 @@ async def on_message(message):
 #     client.loop.create_task(warning_task())
 
 
-client.run(DISCORD_BOT_TOKEN)
+# client.run(DISCORD_BOT_TOKEN)

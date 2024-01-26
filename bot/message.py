@@ -44,7 +44,7 @@ async def send_embedded_message(channel:discord.channel, info:dict):
             adjustment_mess += f"- CPU has to be increased {cpu}.\n" if cpu > 0 else f"- CPU has to be decreased {cpu}.\n"
         if memory != 0:
             adjustment_mess += f"- Memory has to be increased {memory}M.\n" if memory > 0 else f"- Memory has to be decreased {memory}M.\n"
-        if instance:
+        if instance != 0:
             adjustment_mess += f"- Instance has to be increased {instance}.\n" if instance > 0 else f"- Instance has to be decreased {instance}.\n"
             
         embed.add_field(

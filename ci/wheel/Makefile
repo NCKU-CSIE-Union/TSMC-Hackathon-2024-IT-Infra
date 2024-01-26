@@ -1,0 +1,25 @@
+build:
+	docker build -t jasonbigcow/wheel_ci .
+build-linux:
+	docker buildx build --platform linux/amd64 -t jasonbigcow/wheel_ci --push .
+push:
+	docker push jasonbigcow/wheel_ci
+compose:
+	docker compose up -d
+	docker compose logs -f
+down:
+	docker compose down
+
+runner:
+	python3 runner/run.py
+
+init:
+	mkdir logs tasks yaml 
+
+clean-log:
+	rm -rf logs/*
+
+clean-task:
+	rm -rf tasks/*
+
+.PHONY: build build-linux push compose down runner init clean-log clean-task
