@@ -1,0 +1,14 @@
+name: Hello World of Wheel CI
+steps:
+  - name: Stop current container
+    commands:
+      - echo "Hello World"
+  - name: Remove current container
+    commands:
+      - ls -la
+  - name: Pull current image
+    commands:
+      - docker ps
+  - name: Run new container
+    commands:
+      - gcloud auth list

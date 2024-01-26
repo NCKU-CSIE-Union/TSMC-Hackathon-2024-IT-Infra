@@ -1,0 +1,80 @@
+version: "3.8"
+services:
+    dronea:
+        restart: always
+        image: drone/drone:latest
+        depends_on:
+            db:
+                condition: service_healthy
+        environment:
+        - DRONE_SERVER_HOST=localhost
+        - DRONE_SERVER_PROTO=http
+        - DRONE_SERVER_PROXY_HOST=${DRONE_SERVER_PROXY_HOST}
+        - DRONE_SERVER_PROXY_PROTO=https
+        - DRONE_RPC_SECRET=bea26a2221fd8090ea38720fc445eca6
+        - DRONE_COOKIE_SECRET=e8206356c843d81e05ab6735e7ebf075
+        - DRONE_COOKIE_TIMEOUT=720h
+        - DRONE_GITHUB_CLIENT_ID=${DRONE_GITHUB_CLIENT_ID}
+        - DRONE_GITHUB_CLIENT_SECRET=${DRONE_GITHUB_CLIENT_SECRET}
+        - DRONE_LOGS_DEBUG=true
+        - DRONE_CRON_DISABLED=true
+        - DRONE_DATABASE_DRIVER=postgres
+        - DRONE_DATABASE_DATASOURCE=postgres://postgres:postgres@db:5432/drone?sslmode=disable
+        - DRONE_REDIS_CONNECTION=redis://redis-server:6379
+    droneb:
+        restart: always
+        image: drone/drone:latest
+        environment:
+        - DRONE_SERVER_HOST=localhost
+        - DRONE_SERVER_PROTO=http
+        - DRONE_SERVER_PROXY_HOST=${DRONE_SERVER_PROXY_HOST}
+        - DRONE_SERVER_PROXY_PROTO=https
+        - DRONE_RPC_SECRET=bea26a2221fd8090ea38720fc445eca6
+        - DRONE_COOKIE_SECRET=e8206356c843d81e05ab6735e7ebf075
+        - DRONE_COOKIE_TIMEOUT=720h
+        - DRONE_GITHUB_CLIENT_ID=${DRONE_GITHUB_CLIENT_ID}
+        - DRONE_GITHUB_CLIENT_SECRET=${DRONE_GITHUB_CLIENT_SECRET}
+        - DRONE_LOGS_DEBUG=true
+        - DRONE_CRON_DISABLED=true
+        - DRONE_DATABASE_DRIVER=postgres
+        - DRONE_DATABASE_DATASOURCE=postgres://postgres:postgres@db:5432/drone?sslmode=disable
+        - DRONE_REDIS_CONNECTION=redis://redis-server:6379
+        depends_on: 
+        - dronea
+    runner:
+        restart: always
+        image: drone/drone-runner-docker:latest
+        environment:
+        - DRONE_RPC_HOST=proxy
+        - DRONE_RPC_PROTO=http
+        - DRONE_RPC_SECRET=bea26a2221fd8090ea38720fc445eca6
+        - DRONE_TMATE_ENABLED=true
+        volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        depends_on: 
+        - proxy
+        - droneb 
+    redis-server:
+      restart: always
+      image: redis
+    proxy:
+        restart: always
+        image: haproxy
+        ports:
+            - "8080:80"
+        volumes:
+        - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+        depends_on: 
+        - dronea
+    db:
+        restart: always
+        image: postgres
+        environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=drone
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5

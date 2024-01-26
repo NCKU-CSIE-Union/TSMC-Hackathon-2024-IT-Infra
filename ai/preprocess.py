@@ -14,4 +14,7 @@ def preprocess_metric_data(data_dir: str) -> pd.DataFrame:
             # Merge metric_df and tmp_df along the "Time" column
             metric_df = pd.merge(metric_df, tmp_df, on="Time", how="outer")
 
+    # Strip the leading and trailing whitespaces in the "Time" column
+    metric_df["Time"] = metric_df["Time"].apply(lambda x: x.strip())
+
     return metric_df
