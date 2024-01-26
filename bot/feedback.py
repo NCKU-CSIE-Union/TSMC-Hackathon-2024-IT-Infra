@@ -1,9 +1,8 @@
-import discord
-
 active_threads = []
 
+
 async def get_active_threads():
-    return active_threads  
+    return active_threads
 
 
 async def create_thread(message):
@@ -16,13 +15,18 @@ async def create_thread(message):
     print(active_threads)
 
 
+def feedback_retrieval(message, thread_id):
+    # TODO: Peter這邊 feedback_retrival(message, thread_id) 這裡面要做 store 的動作
+    return "AI response"
+
+
 async def process_feedback(message, thread):
     print(f"收到feedback:{message.content}")
-    await thread.send(f"Feedback received ! Thanks for your feedback, we will use this to improve our message!")
+    await thread.send(
+        "Feedback received ! Thanks for your feedback, we will use this to improve our message!"
+    )
     print(message.content)
     print(thread.id)
     # Peter這邊 feedback_retrival(message.content, thread.id)
-
-
-
-    
+    ai_response = feedback_retrieval(message.content, thread.id)
+    await thread.send(ai_response)
