@@ -1,0 +1,14 @@
+name: Consumer Test
+steps:
+  - name: Stop current container
+    commands:
+      - docker stop consumer-test
+  - name: Remove current container
+    commands:
+      - docker rm consumer-test
+  - name: Pull current image
+    commands:
+      - docker pull jasonbigcow/tsmc-hackathon-2024-consumer
+  - name: Run new container
+    commands:
+      - docker run -d --name consumer-test -p 80:80 jasonbigcow/tsmc-hackathon-2024-consumer
