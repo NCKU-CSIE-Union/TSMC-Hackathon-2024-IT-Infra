@@ -3,8 +3,77 @@ import os
 import discord
 from dotenv import load_dotenv
 
+from monitor.monitor_runner import MonitorRunner
+
 from .feedback import get_active_threads, process_feedback
 from .message import send_embedded_message
+from .thread import DiscordThreadManager
+
+
+class DiscordBot:
+    def __init__(
+        self,
+        client: discord.Client,
+        token: str,
+        channel_id: int,
+        monitor_runner: MonitorRunner,
+        discord_thread_manager: DiscordThreadManager,
+    ):
+        self.intents = discord.Intents.default()
+        self.intents.messages = True
+        self.intents.message_content = True
+        self.token = token
+        self.channel_id = channel_id
+        self.client = client
+        # self.active_threads = []
+        self.discord_thread_manager = discord_thread_manager
+        self.monitor_runner = monitor_runner
+
+    async def update_active_threads(self):
+        self.active_threads = await get_active_threads()
+
+    async def on_ready(self):
+        print(f"Logged in as {self.client.user}")
+
+    async def on_message(self, message):
+        print("on_message")
+        if message.author == self.client.user:
+            return
+
+        for thread in self.discord_thread_manager.get_active_threads():
+            if message.channel.id == thread.id:
+                await process_feedback(message, thread)
+
+    def feedback_retrieval(message, thread_id):
+        # TODO: Peter這邊 feedback_retrival(message, thread_id) 這裡面要做 store 的動作
+        return "AI response"
+
+    async def process_feedback(self, message, thread):
+        print(f"收到feedback:{message.content}")
+        await thread.send(
+            "Feedback received ! Thanks for your feedback, we will use this to improve our message!"
+        )
+        print(message.content)
+        print(thread.id)
+        # Peter這邊 feedback_retrival(message.content, thread.id)
+        ai_response = self.monitor_runner.get_agent_response(message.content, thread.id)
+        await thread.send(ai_response)
+
+    async def send_alert(self, message_dict: dict):
+        print("broadcasting")
+        # test_channel_id = self.token
+        channel = self.client.get_channel(self.channel_id)
+        if channel:
+            try:
+                await send_embedded_message(channel, message_dict)
+            except Exception as e:
+                print("Error sending warning message:", e)
+
+    def run(self):
+        self.client.event(self.on_ready)
+        self.client.event(self.on_message)
+        self.client.run(self.token)
+
 
 load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
