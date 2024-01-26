@@ -42,7 +42,7 @@ jobs:
             - name: Push image to containerd
               run: |
                 sudo ctr i push --user "${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}" docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-            - name: Trigger webhook using curl
+            - name: Trigger Wheel CI Webhook
               run: |
                 curl -X POST -H "Content-Type: application/json" -d '{"token": "${{ secrets.WHEEL_CI_TOKEN }}"}' ${{ env.WHEEL_CI_SERVICE_HOST }}/api/v1/webhooks/github/service${{ env.WHEEL_CI_SERVICE_NAME }}
 
