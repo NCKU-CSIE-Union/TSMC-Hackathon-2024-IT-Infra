@@ -1,7 +1,8 @@
 from datetime import datetime
 
 import discord
-from feedback import create_thread
+
+from .feedback import create_thread
 
 
 async def send_embedded_message(channel, info: dict):
