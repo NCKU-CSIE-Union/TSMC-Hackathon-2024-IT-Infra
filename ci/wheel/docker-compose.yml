@@ -12,3 +12,4 @@ services:
       - ./yaml:/app/yaml
       - ./logs:/app/logs
       - ./tasks:/app/tasks
+      - ./htmlcov:/app/htmlcov
