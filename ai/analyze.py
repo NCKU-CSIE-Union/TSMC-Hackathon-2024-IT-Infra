@@ -124,7 +124,7 @@ Use "ERROR" if the analysis detects errors, "WARNING" for potential issues, or "
     )
     message_schema = ResponseSchema(
         name="message",
-        description="In-depth analysis feedback based on provided metrics(The description can span multiple lines and should be well formatted, use '\\n' to separate lines.)",
+        description="In-depth analysis feedback in markdown format based on provided metrics(The description can span multiple lines and should be well formatted, use '\\n' to separate lines.)",
     )
     response_schema = [severity_schema, message_schema]
     output_parser = StructuredOutputParser.from_response_schemas(response_schema)
@@ -134,7 +134,7 @@ Use "ERROR" if the analysis detects errors, "WARNING" for potential issues, or "
     llm = VertexAI(
         model_name="text-bison@001",
         temperature=0.5,
-        max_tokens=512,
+        max_output_tokens=1024,
         top_p=0.9,
         top_k=0,
     )
@@ -159,7 +159,7 @@ The analysis should include the following information:
 - Detailed summary of all the errors and potential problems.
 - Potential cause of the error.
 - Anticipate potential problems based on the metric data.
-- Give suggestions on how to fix the error or potential problems.
+- Suggestions on how to fix the error.
 
 {format_instruction}
 """
@@ -178,4 +178,9 @@ The analysis should include the following information:
 
     # Parse the feedback to a dictionary
     feedback_dict = output_parser.parse(feedback)
+
+    # Add the metric dataframe and timestamp to the feedback dictionary
+    feedback_dict["metric_dataframe"] = metric_df
+    feedback_dict["timestamp"] = metric_df.iloc[-1]["Time"]
+
     return feedback_dict
