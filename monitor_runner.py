@@ -5,9 +5,7 @@ import time
 
 import pandas as pd
 
-from ai.analyze import (
-    analyze_by_llm,
-)
+from ai.analyze import analyze_by_llm
 from bot.bot import broadcast, client, run_bot
 from monitor.service import cloudrun, log
 
@@ -74,3 +72,16 @@ async def main():
 
 
 asyncio.run(main())
+
+# {
+#     "discord_thread_1233": "uuid_4243343",
+#     "uuid_4243343": "discord_thread_1233"
+# }
+
+# {
+#     "123": {
+#         "logs": List[pd.DataFrame],
+#         "feedbacks": List[str],
+#         "user_messages": List[str],
+#     }
+# }
