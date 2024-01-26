@@ -1,11 +1,79 @@
-import asyncio
 import os
 
 import discord
 from dotenv import load_dotenv
 
-from feedback import get_active_threads, process_feedback
-from message import send_embedded_warning
+from monitor.monitor_runner import MonitorRunner
+
+from .feedback import get_active_threads, process_feedback
+from .message import send_embedded_message
+from .thread import DiscordThreadManager
+
+
+class DiscordBot:
+    def __init__(
+        self,
+        client: discord.Client,
+        token: str,
+        channel_id: int,
+        monitor_runner: MonitorRunner,
+        discord_thread_manager: DiscordThreadManager,
+    ):
+        self.intents = discord.Intents.default()
+        self.intents.messages = True
+        self.intents.message_content = True
+        self.token = token
+        self.channel_id = channel_id
+        self.client = client
+        # self.active_threads = []
+        self.discord_thread_manager = discord_thread_manager
+        self.monitor_runner = monitor_runner
+
+    async def update_active_threads(self):
+        self.active_threads = await get_active_threads()
+
+    async def on_ready(self):
+        print(f"Logged in as {self.client.user}")
+
+    async def on_message(self, message):
+        print("on_message")
+        if message.author == self.client.user:
+            return
+
+        for thread in self.discord_thread_manager.get_active_threads():
+            if message.channel.id == thread.id:
+                await process_feedback(message, thread)
+
+    def feedback_retrieval(message, thread_id):
+        # TODO: Peter這邊 feedback_retrival(message, thread_id) 這裡面要做 store 的動作
+        return "AI response"
+
+    async def process_feedback(self, message, thread):
+        print(f"收到feedback:{message.content}")
+        await thread.send(
+            "Feedback received ! Thanks for your feedback, we will use this to improve our message!"
+        )
+        print(message.content)
+        print(thread.id)
+        # Peter這邊 feedback_retrival(message.content, thread.id)
+        ai_response = self.monitor_runner.get_agent_response(message.content, thread.id)
+        await thread.send(ai_response)
+
+    async def send_alert(self, message_dict: dict):
+        print("broadcasting")
+        # test_channel_id = self.token
+        channel = self.client.get_channel(self.channel_id)
+        if channel:
+            try:
+                await send_embedded_message(channel, message_dict)
+            except Exception as e:
+                print("Error sending warning message:", e)
+
+    def run(self):
+        self.client.event(self.on_ready)
+        self.client.event(self.on_message)
+        self.client.run(self.token)
+
 
 load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
@@ -22,10 +90,16 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
-warning_message = {
-    "severity": "WARNING",
-    "message": "This is a test warning message."
+test_info = {
+    "severity": "ERROR",
+    "cpu": -1,
+    "memory": 0,
+    "instance": 1,
+    "message": "The application is experiencing high latency and is unable to keep up with the demand. The number of tasks in the queue has been above 100 for the past 5 minutes and the average task execution time has been above 30 seconds. I recommend increasing the number of instances by 1.",
+    "timestamp": "2024-01-26 11:05:49+00:00"
+    # 'metric_dataframe': pd.DataFrame
 }
+
 
 
 async def update_active_threads():
@@ -36,14 +110,15 @@ async def update_active_threads():
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
-    channel = client.get_channel(DISCORD_DST_CHANNEL_ID)
-    client.loop.create_task(update_active_threads())
-    if channel:
-        await send_embedded_warning(channel, warning_message)
-        # await asyncio.sleep(5)
-        # await send_embedded_error(channel)
-        # await asyncio.sleep(5)
-        # await send_embedded_info(channel)
+    # channel = client.get_channel(DISCORD_DST_CHANNEL_ID)
+    # client.loop.create_task(update_active_threads())
+    # if channel:
+    #     await send_embedded_message(channel, test_info)
+
+    # await asyncio.sleep(5)
+    # await send_embedded_error(channel)
+    # await asyncio.sleep(5)
+    # await send_embedded_info(channel)
 
 
 # 監聽討論串訊息
@@ -57,21 +132,20 @@ async def on_message(message):
             await process_feedback(message, thread)
 
 
-# async def broadcast(message_dict: dict):
-#     print("broadcasting")
-#     test_channel_id = 1199372364870340810
-#     channel = client.get_channel(test_channel_id)
-#     if channel:
-#         try:
-#             await send_embedded_warning(channel, message_dict["message"])
-#         except Exception as e:
-#             print("Error sending warning message:", e)
-#         await asyncio.sleep(5)
+async def send_alert(message_dict: dict):
+    print("broadcasting")
+    test_channel_id = DISCORD_DST_CHANNEL_ID
+    channel = client.get_channel(test_channel_id)
+    if channel:
+        try:
+            await send_embedded_message(channel, message_dict)
+        except Exception as e:
+            print("Error sending warning message:", e)
 
 
-# def run_bot():
-#     print("TSMC System Bot is Online!")
-#     client.run(DISCORD_BOT_TOKEN)
+def run_bot():
+    # print("TSMC System Bot is Online!")
+    client.run(DISCORD_BOT_TOKEN)
 
 
 # 測試 function
@@ -99,4 +173,4 @@ async def on_message(message):
 #     client.loop.create_task(warning_task())
 
 
-client.run(DISCORD_BOT_TOKEN)
+# client.run(DISCORD_BOT_TOKEN)

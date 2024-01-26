@@ -79,7 +79,7 @@ def get_enque_deque_log():
     pass
 
 
-def tail_log_entry(service_name):
+def tail_log_entry(service_name, max_results=10):
     """
     resource.type="cloud_run_revision"
     resource.labels.revision_name="consumer-sentry-00004-864"
@@ -98,12 +98,12 @@ def tail_log_entry(service_name):
 
     query: logging_v2.LogEntry = logger.list_entries(
         filter_=f"resource.type={resource_type} AND resource.labels.service_name={service_name}",
-        max_results=10,
+        max_results=max_results,
         order_by=logging_v2.DESCENDING,
     )
 
     for entry in query:
-        yield f"{entry.timestamp} {entry.payload}"
+        yield entry.payload
 
 
 # REST API

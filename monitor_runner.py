@@ -1,82 +1,96 @@
 import asyncio
-import re
 import threading
 import time
 
 import pandas as pd
 
 from ai.analyze import analyze_by_llm
-from bot.bot import broadcast, client, run_bot
-from monitor.service import cloudrun, log
-
-cloudrun.CloudRunManager()
+from bot.bot import run_bot
+from monitor.service import cloudrun, conversation_manager, log
 
 
-def parser(line):
-    pattern = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+\+\d{2}:\d{2}) (\w+): +(\d+\.\d+),(\d+\.\d+),(\d+),(\d+\.\d+)"
+def parser(line: str):
+    parsed_data = [line.split(",")]
 
-    match = re.match(pattern, line)
-    if match:
-        parsed_data = [match.groups()]
+    parsed_data[0][0] += "+00:00"
 
-        df = pd.DataFrame(
-            parsed_data,
-            columns=["time", "level", "cpu", "ram", "remain_count", "avg_exe_time"],
-        )
+    df = pd.DataFrame(
+        parsed_data,
+        columns=[
+            "Time",
+            "cpu",
+            "ram",
+            "Remaining Task Count in Queue",
+            "Average Task Execution Time",
+        ],
+    )
 
-        df["time"] = pd.to_datetime(df["time"])
-        df[["cpu", "ram", "avg_exe_time"]] = df[["cpu", "ram", "avg_exe_time"]].astype(
-            float
-        )
-        df["remain_count"] = df["remain_count"].astype(int)
+    df["Time"] = pd.to_datetime(df["Time"], utc=0)
+    # add timezone utc=0 to the time column
+    # df["Time"] = df["Time"].dt.tz_convert(tz="UTC")
+    df.drop(columns=["cpu", "ram"], inplace=True)
+    df = df.astype(
+        {
+            "Remaining Task Count in Queue": int,
+            "Average Task Execution Time": float,
+        }
+    )
 
-        return df
+    return df
 
 
-def fill_missing_columns(metric_df) -> pd.DataFrame:
-    columns_to_fill = [
-        "Instance Count (active)",
-        "Instance Count (idle)",
-        "Container CPU Utilization (%)",
-        "Container Memory Utilization (%)",
-        "Container Startup Latency (ms)",
-        "Response Count (4xx)",
-        "Response Count (5xx)",
-    ]
+class FakeChatAI:
+    # def __init__(self):
+    # self.chatbot = conversation_manager.ConversationManager()
+    def get_response(self, conversion_id: str, user_message: str):
+        """_summary_
 
-    for column in columns_to_fill:
-        if column not in metric_df.columns:
-            metric_df[column] = 0
+        Args:
+            conversion_id (str): the id of the discord thread
+            user_message (str): user's new input
 
-    metric_df["Time"] = metric_df["time"]
-
-    return metric_df
+        Returns:
+            _type_: _description_
+        """
+        a = "fake response:" + user_message
+        return a
 
 
 async def main():
     print("Running monitor runner...")
-    logDF: pd.DataFrame = pd.DataFrame()
+
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.start()
+    conversation_manager.ConversationManager()
+    cloudrun_manager = cloudrun.CloudRunManager()
+    target_service_name = "consumer-latest"
     while True:
-        for log_line in log.tail_log_entry(service_name="consumer-sentry"):
+        print("fetching...")
+        log_df: pd.DataFrame = pd.DataFrame()
+        for log_line in log.tail_log_entry(
+            service_name=target_service_name, max_results=100
+        ):
             parse_df = parser(log_line)
-            logDF = pd.concat([logDF, parse_df], ignore_index=True)
-            with open("log_data.csv", "w") as f:
-                logDF.to_csv(f, index=False)
-            result = analyze_by_llm(fill_missing_columns(logDF))
-            asyncio.run_coroutine_threadsafe(
-                broadcast(message_dict=result), client.loop
-            )
-        time.sleep(10)
+            log_df = pd.concat([log_df, parse_df])
+
+        # get the min and max time
+        min_time = int(log_df["Time"].min().timestamp())
+        max_time = int(log_df["Time"].max().timestamp())
+
+        metrics_df: pd.DataFrame = cloudrun_manager.get_metrics(
+            target_service_name, min_time, max_time
+        )
+        metrics_df["Time"] = pd.to_datetime(metrics_df["Time"])
+        log_df["Time"] = pd.to_datetime(log_df["Time"])
+        merged_df = pd.merge(log_df, metrics_df, on="Time", how="inner")
+        merged_df.sort_values("Time", inplace=True)
+
+        analyze_by_llm(merged_df)
+        time.sleep(60)
 
 
-asyncio.run(main())
-
-# {
-#     "discord_thread_1233": "uuid_4243343",
-#     "uuid_4243343": "discord_thread_1233"
-# }
+if __name__ == "__main__":
+    asyncio.run(main())
 
 # {
 #     "discord_thread_1233": {

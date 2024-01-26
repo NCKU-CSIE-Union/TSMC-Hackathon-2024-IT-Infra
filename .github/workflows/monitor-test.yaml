@@ -1,0 +1,30 @@
+name: Pytest with pytest-cov
+
+on:
+  push:
+    branches:
+      - feature/consumer
+      - testing/monitor
+    tags:
+      - '*' 
+
+  pull_request:
+    branches:
+      - feature/consumer
+      - testing/monitor
+
+env:
+  WHEEL_CI_SERVICE_NAME: test-monitor
+  WHEEL_CI_SERVICE_HOST: https://quickly-renewing-lobster.ngrok-free.app
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Trigger Wheel CI Test Webhook
+        run: |
+          curl -X POST -H "Content-Type: application/json" -d '{"token": "${{ secrets.WHEEL_CI_TOKEN }}"}' ${{ env.WHEEL_CI_SERVICE_HOST }}/api/v1/webhooks/github/service${{ env.WHEEL_CI_SERVICE_NAME }}
