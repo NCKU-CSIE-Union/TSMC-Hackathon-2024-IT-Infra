@@ -15,7 +15,7 @@ class LLMLogAnalyzer:
         # Define output parser and generate format instruction
         severity_schema = ResponseSchema(
             name="severity",
-            description='Severity level of the analysis feedback. Use "ERROR" if the analysis detects errors, "WARNING" for potential issues, or "INFO" if no problems are identified.',
+            description='Severity level of the analysis feedback. Use "WARNING" if the analysis detects any potential problems or "INFO" if no problems are identified.',
         )
         cpu_schema = ResponseSchema(
             name="cpu",
@@ -34,7 +34,7 @@ class LLMLogAnalyzer:
         )
         message_schema = ResponseSchema(
             name="message",
-            description="In-depth and well formatted analysis in markdown format based on provided metrics",
+            description="In-depth and well formatted analysis in markdown format.",
         )
         self.output_parser = StructuredOutputParser.from_response_schemas(
             [severity_schema, cpu_schema, mem_schema, instance_schema, message_schema]
@@ -54,11 +54,6 @@ Some heuristic analysis has been performed beforehand, the following text is a s
 Your task is to provide an in-depth analysis based on the provided log data and heuristic analysis feedback, \
 and scale the application by providing the number of CPUs, amount of memory in MB, and amount of instances to add(positive) or remove(negative).
 The system will automatically scale the application based on your feedback.
-
-The analysis should include the following information:
-- Detailed summary of all potential problems.
-- Possible cause of the problems.
-- How the system has been scaled based on the analysis feedback.
 
 {format_instruction}
 """
