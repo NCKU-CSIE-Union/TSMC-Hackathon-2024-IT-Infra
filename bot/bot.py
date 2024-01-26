@@ -36,32 +36,21 @@ class DiscordBot:
         print(f"Logged in as {self.client.user}")
 
     async def on_message(self, message):
-        print("on_message")
         if message.author == self.client.user:
             return
 
         for thread in self.discord_thread_manager.get_active_threads():
             if message.channel.id == thread.id:
-                await process_feedback(message, thread)
-
-    def feedback_retrieval(message, thread_id):
-        # TODO: Peter這邊 feedback_retrival(message, thread_id) 這裡面要做 store 的動作
-        return "AI response"
+                await self.process_feedback(message, thread)
 
     async def process_feedback(self, message, thread):
-        print(f"收到feedback:{message.content}")
-        await thread.send(
-            "Feedback received ! Thanks for your feedback, we will use this to improve our message!"
+        ai_response = self.monitor_runner.get_agent_response(
+            str(thread.id),
+            message.content,
         )
-        print(message.content)
-        print(thread.id)
-        # Peter這邊 feedback_retrival(message.content, thread.id)
-        ai_response = self.monitor_runner.get_agent_response(message.content, thread.id)
         await thread.send(ai_response)
 
     async def send_alert(self, message_dict: dict):
-        print("broadcasting")
-        # test_channel_id = self.token
         channel = self.client.get_channel(self.channel_id)
         if channel:
             try:
@@ -73,6 +62,9 @@ class DiscordBot:
         self.client.event(self.on_ready)
         self.client.event(self.on_message)
         self.client.run(self.token)
+
+    async def cleanup(self):
+        await self.client.close()
 
 
 load_dotenv()
@@ -96,10 +88,9 @@ test_info = {
     "memory": 0,
     "instance": 1,
     "message": "The application is experiencing high latency and is unable to keep up with the demand. The number of tasks in the queue has been above 100 for the past 5 minutes and the average task execution time has been above 30 seconds. I recommend increasing the number of instances by 1.",
-    "timestamp": "2024-01-26 11:05:49+00:00"
+    "timestamp": "2024-01-26 11:05:49+00:00",
     # 'metric_dataframe': pd.DataFrame
 }
-
 
 
 async def update_active_threads():

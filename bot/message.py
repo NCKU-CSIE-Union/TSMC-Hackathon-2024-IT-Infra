@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import discord
 
 
@@ -24,8 +22,8 @@ async def send_embedded_message(channel: discord.channel, info: dict):
     )
 
     # Set the timestamp
-    timestamp_format = "%Y-%m-%d %H:%M:%S%z"
-    parsed_timestamp = datetime.strptime(info["timestamp"], timestamp_format)
+    # timestamp_format = "%Y-%m-%d %H:%M:%S%z"
+    parsed_timestamp = info["timestamp"]
     embed.timestamp = parsed_timestamp
 
     # Set the footer
