@@ -6,7 +6,7 @@ from core.schema import AuthRequest
 
 settings = get_settings()
 
-router = APIRouter(
+webhook_router = APIRouter(
     prefix="/webhooks",
     tags=["webhooks"],
 )
@@ -19,7 +19,7 @@ def auth_middleware(auth: AuthRequest):
     return auth
 
 
-@router.post("/github/service/{service_name}", status_code=200)
+@webhook_router.post("/github/service/{service_name}", status_code=200)
 async def github_webhook(
     service_name: str, bg: BackgroundTasks, auth: AuthRequest = Depends(auth_middleware)
 ):

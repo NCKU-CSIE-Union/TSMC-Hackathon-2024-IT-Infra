@@ -10,7 +10,7 @@ def check_new_task():
     # using `ls ./tasks`
     # then run the task
 
-    ls_output = subprocess.check_output(["ls", "./tasks"])
+    ls_output = subprocess.check_output(["ls", "./tasks"], env=os.environ.copy())
     ls_output = ls_output.decode("utf-8")
 
     if len(ls_output) > 0:

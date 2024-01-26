@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 # for logging middleware
 from fastapi import Request
 import time
 
-from core.api import router as hook_router
+from core.api import webhook_router as hook_router
 
 from core.config import get_settings
 
@@ -49,3 +50,7 @@ async def add_process_time_header(request: Request, call_next: callable):
 
 # include routers
 app.include_router(hook_router, prefix="/api/v1")
+
+# test static files
+# view at http://localhost:8080/api/v1/test/result/index.html
+app.mount("/api/v1/test/result", StaticFiles(directory="htmlcov"), name="static")
