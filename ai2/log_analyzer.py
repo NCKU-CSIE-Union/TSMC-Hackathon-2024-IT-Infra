@@ -7,7 +7,38 @@ from vertexai.language_models import TextEmbeddingModel
 
 
 class LLMLogAnalyzer:
+    """
+    LLMLogAnalyzer is a class that performs log analysis and provides scaling recommendations for a Google Cloud Run application.
+
+    Args:
+        pinecone_api_key (str): The API key for accessing the Pinecone service.
+        index_name (str): The name of the Pinecone index.
+        llm_args (dict): Additional arguments for initializing the VertexAI model.
+
+    Attributes:
+        llm (VertexAI): The VertexAI model for performing log analysis.
+        db (Pinecone.Index): The Pinecone index for storing log embeddings.
+        embedding_model (TextEmbeddingModel): The text embedding model for generating log embeddings.
+        output_parser (StructuredOutputParser): The output parser for parsing the analysis feedback.
+        format_instruction (str): The format instruction for providing scaling recommendations.
+        prompt_template (PromptTemplate): The prompt template for generating analysis prompts.
+
+    Methods:
+        analyze_log: Analyzes the log data and provides scaling recommendations.
+        store_memory: Stores the analysis feedback and log data in the Pinecone index.
+        chat: Performs a conversation with the AI based on the stored analysis feedback.
+
+    """
+
     def __init__(self, pinecone_api_key: str, index_name: str, llm_args: dict) -> None:
+        """
+        Initializes the LLMLogAnalyzer.
+
+        Args:
+            pinecone_api_key (str): The API key for accessing the Pinecone service.
+            index_name (str): The name of the Pinecone index.
+            llm_args (dict): Additional arguments for initializing the VertexAI model.
+        """
         self.llm = VertexAI(**llm_args)
 
         pc = Pinecone(api_key=pinecone_api_key)
@@ -67,6 +98,15 @@ The system will automatically scale the application based on your feedback.
         )
 
     def _heuristic_analysis(self, log_df: pd.DataFrame) -> str:
+        """
+        Performs heuristic analysis on the log data.
+
+        Args:
+            log_df (pd.DataFrame): The log data as a pandas DataFrame.
+
+        Returns:
+            str: The analysis feedback based on the heuristic analysis.
+        """
         feedback = ""
 
         # Analyze CPU utilization
@@ -75,28 +115,34 @@ The system will automatically scale the application based on your feedback.
             if log_df.iloc[i][cpu_label] > 40 and log_df.iloc[i + 1][cpu_label] > 40:
                 feedback += f"- Container CPU Utilization (%) is above 40% for two minutes, at {log_df.iloc[i]['Time']} and {log_df.iloc[i + 1]['Time']}\n"
 
-            # Analyze memory utilization
-            mem_label = "Container Memory Utilization (%)"
-            for i in range(len(log_df) - 1):
-                if (
-                    log_df.iloc[i][mem_label] > 50
-                    and log_df.iloc[i + 1][mem_label] > 50
-                ):
-                    feedback += f"- Container Memory Utilization (%) is above 50% for two minutes, at {log_df.iloc[i]['Time']} and {log_df.iloc[i + 1]['Time']}\n"
+        # Analyze memory utilization
+        mem_label = "Container Memory Utilization (%)"
+        for i in range(len(log_df) - 1):
+            if log_df.iloc[i][mem_label] > 50 and log_df.iloc[i + 1][mem_label] > 50:
+                feedback += f"- Container Memory Utilization (%) is above 50% for two minutes, at {log_df.iloc[i]['Time']} and {log_df.iloc[i + 1]['Time']}\n"
 
-            # Analyze remaining task count in queue
-            for i in range(len(log_df)):
-                if log_df.iloc[i]["Remaining Task Count in Queue"] > 100:
-                    feedback += f"- Remaining Task Count in Queue is above 100 at {log_df.iloc[i]['Time']}\n"
+        # Analyze remaining task count in queue
+        for i in range(len(log_df)):
+            if log_df.iloc[i]["Remaining Task Count in Queue"] > 100:
+                feedback += f"- Remaining Task Count in Queue is above 100 at {log_df.iloc[i]['Time']}\n"
 
-            # Analyze average task execution time
-            for i in range(len(log_df)):
-                if log_df.iloc[i]["Average Task Execution Time"] > 30:
-                    feedback += f"- Average Task Execution Time is above 30 seconds at {log_df.iloc[i]['Time']}\n"
+        # Analyze average task execution time
+        for i in range(len(log_df)):
+            if log_df.iloc[i]["Average Task Execution Time"] > 30:
+                feedback += f"- Average Task Execution Time is above 30 seconds at {log_df.iloc[i]['Time']}\n"
 
-            return feedback
+        return feedback
 
     def analyze_log(self, log_df: pd.DataFrame) -> dict:
+        """
+        Analyzes the log data with LLM and provides scaling recommendations.
+
+        Args:
+            log_df (pd.DataFrame): The log data as a pandas DataFrame.
+
+        Returns:
+            dict: A dictionary containing the analysis feedback and other information.
+        """
         # Perform heuristic analysis to aid the model
         heuristic_feedback = self._heuristic_analysis(log_df)
 
