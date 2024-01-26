@@ -22,6 +22,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Auth with Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}' 
+
       - name: Install poetry
         run: pipx install poetry
       - uses: actions/setup-python@v5
