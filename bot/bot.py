@@ -1,50 +1,78 @@
-import discord
-import random
 import asyncio
-import os 
-from message import send_embedded_warning, send_embedded_error,send_embedded_info
-from feedback import get_active_threads, process_feedback
+import os
+
+import discord
 from dotenv import load_dotenv
+
+from feedback import get_active_threads, process_feedback
+from message import send_embedded_warning
+
 load_dotenv()
-DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+DISCORD_DST_CHANNEL_ID = int(os.getenv("DISCORD_DST_CHANNEL_ID"))
 
 last_warning = None
 active_threads = []
+
 
 # 權限設置
 intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
 
-client = discord.Client(intents = intents)
+client = discord.Client(intents=intents)
+
+warning_message = {
+    "severity": "WARNING",
+    "message": "This is a test warning message."
+}
+
 
 async def update_active_threads():
     global active_threads
     active_threads = await get_active_threads()
 
+
 @client.event
 async def on_ready():
-    print(f'Logged in as {client.user}')
-    test_channel_id = 1199372364870340810  
-    channel = client.get_channel(test_channel_id)
+    print(f"Logged in as {client.user}")
+    channel = client.get_channel(DISCORD_DST_CHANNEL_ID)
     client.loop.create_task(update_active_threads())
     if channel:
-        await send_embedded_warning(channel)
+        await send_embedded_warning(channel, warning_message)
         # await asyncio.sleep(5)
         # await send_embedded_error(channel)
         # await asyncio.sleep(5)
         # await send_embedded_info(channel)
+
 
 # 監聽討論串訊息
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
-    
+
     for thread in active_threads:
         if message.channel.id == thread.id:
             await process_feedback(message, thread)
-    
+
+
+# async def broadcast(message_dict: dict):
+#     print("broadcasting")
+#     test_channel_id = 1199372364870340810
+#     channel = client.get_channel(test_channel_id)
+#     if channel:
+#         try:
+#             await send_embedded_warning(channel, message_dict["message"])
+#         except Exception as e:
+#             print("Error sending warning message:", e)
+#         await asyncio.sleep(5)
+
+
+# def run_bot():
+#     print("TSMC System Bot is Online!")
+#     client.run(DISCORD_BOT_TOKEN)
+
 
 # 測試 function
 # async def pull_warning():
@@ -59,9 +87,9 @@ async def on_message(message):
 #         if new_warning != last_warning:
 #             # 如果新警告與上一次警告不同，則向 Discord 頻道發送新警告
 #             last_warning = new_warning
-#             channel = client.get_channel(1199372364870340810)  
+#             channel = client.get_channel(1199372364870340810)
 #             await channel.send(new_warning)
-#         await asyncio.sleep(5)  
+#         await asyncio.sleep(5)
 
 
 # @client.event
@@ -70,5 +98,5 @@ async def on_message(message):
 #     print("TSMC System Bot is Online!")
 #     client.loop.create_task(warning_task())
 
-    
+
 client.run(DISCORD_BOT_TOKEN)
