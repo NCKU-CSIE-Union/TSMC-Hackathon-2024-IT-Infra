@@ -3,12 +3,12 @@ steps:
   - name: Stop current container
     commands:
       - echo "Hello World"
-  - name: Remove current container
+  - name: List current directory
     commands:
       - ls -la
-  - name: Pull current image
+  - name: List current containers
     commands:
       - docker ps
-  - name: Run new container
+  - name: Run `gcloud` command on Host VM
     commands:
       - gcloud auth list

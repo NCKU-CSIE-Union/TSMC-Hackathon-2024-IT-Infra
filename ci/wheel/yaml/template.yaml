@@ -2,13 +2,13 @@ name: Hello World of Wheel CI
 steps:
   - name: Stop current container
     commands:
-      - sudo docker stop hello-world
+      - docker  stop hello-world
   - name: Remove current container
     commands:
-      - sudo docker rm hello-world
+      - docker  rm hello-world
   - name: Pull current image
     commands:
-      - sudo docker pull hello-world
+      - docker  pull hello-world
   - name: Run new container
     commands:
-      - sudo docker run -d --name hello-world -p 80:80 hello-world
+      - docker  run -d --name hello-world -p 80:80 hello-world

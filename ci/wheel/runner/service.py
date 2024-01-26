@@ -10,7 +10,9 @@ def check_new_task():
     # using `ls ./tasks`
     # then run the task
 
-    ls_output = subprocess.check_output(["ls", "./tasks"], env=os.environ.copy())
+    ls_output = subprocess.check_output(
+        ["ls", "./tasks"], env=os.environ.copy(), stderr=subprocess.STDOUT
+    )
     ls_output = ls_output.decode("utf-8")
 
     if len(ls_output) > 0:
@@ -64,9 +66,17 @@ def run_yaml_task(yaml_path, logger):
 
             # run the command
             try:
-                output = subprocess.check_output(command.split(" "))
-                output = output.decode("utf-8")
-                logger.info(f"Output:\n{output}")
+                with subprocess.Popen(
+                    command.split(),
+                    stdout=subprocess.PIPE,
+                    bufsize=1,
+                    universal_newlines=True,
+                ) as p:
+                    for line in p.stdout:
+                        # remove the newline character
+                        line = line[:-1]
+                        logger.info(f"Output: {line}")
+
             except Exception as e:
                 logger.error(f"Error: {e}")
 

@@ -1,8 +1,5 @@
 name: Test Monitor Yaml
 steps:
-  - name: Pip 
-    commands:
-      - pip3 list
   - name: Run Monitor Tests
     commands:
       - coverage run -m pytest ../../monitor/tests
