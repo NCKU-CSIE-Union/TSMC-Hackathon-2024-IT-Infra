@@ -5,9 +5,6 @@ active_threads = []
 async def get_active_threads():
     return active_threads  
 
-async def send_feedback(content):
-    # 看 Jerry 那邊要怎麼收
-    pass
 
 async def create_thread(message):
     # 創建討論串
@@ -20,9 +17,11 @@ async def create_thread(message):
 
 
 async def process_feedback(message, thread):
-    await thread.send(f"This is your feedback\n {message.content}\n Thanks for your feedback, Jerry will take care of it!")
-    print("成功發送「確認收到feedback訊息」")
-    # await send_feedback(message)
+    print(f"收到feedback:{message.content}")
+    await thread.send(f"Feedback received ! Thanks for your feedback, we will use this to improve our message!")
+    print(message.content)
+    print(thread.id)
+    # Peter這邊 feedback_retrival(message.content, thread.id)
 
 
 
