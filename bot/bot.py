@@ -1,4 +1,3 @@
-import asyncio
 import os
 
 import discord
@@ -22,10 +21,7 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
-warning_message = {
-    "severity": "WARNING",
-    "message": "This is a test warning message."
-}
+warning_message = {"severity": "WARNING", "message": "This is a test warning message."}
 
 
 async def update_active_threads():

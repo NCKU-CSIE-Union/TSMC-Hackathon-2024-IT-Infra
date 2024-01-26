@@ -2,12 +2,12 @@ import discord
 from feedback import create_thread
 
 
-async def send_embedded_warning(channel,warning_mess:dict):
+async def send_embedded_warning(channel, warning_mess: dict):
     # 創建一個 Embed 對象
     embed = discord.Embed(
-        title = warning_mess["severity"],
+        title=warning_mess["severity"],
         description="We're out of CPU !!!",
-        color=0xF31CC8
+        color=0xF31CC8,
     )
 
     # 添加欄位
