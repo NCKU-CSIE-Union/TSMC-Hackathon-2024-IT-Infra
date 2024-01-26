@@ -113,9 +113,6 @@ def analyze_by_llm(metric_df: pd.DataFrame) -> dict:
     # Analysis feedback by heuristic rules
     heuristic_feedback = analyze_by_rule(metric_df)
 
-    print(heuristic_feedback)
-    print()
-
     # Define response schema
     severity_schema = ResponseSchema(
         name="severity",
@@ -143,6 +140,14 @@ Use "ERROR" if the analysis detects errors, "WARNING" for potential issues, or "
 The following text contains metric data for a Google Cloud Run application. \
 This data is presented in CSV format and encompasses the most recent {time_span} minutes:
 {metric_data}
+
+The metric data collected are as follows:
+- Time: The time at which the metric data was collected.
+- Container CPU Utilization (%): Container CPU utilization distribution across all container instances. Sampled every 60 seconds. After sampling, data is not visible for up to 60 seconds.
+- Container Memory Utilization (%): Container memory utilization distribution across all container instances. Sampled every 60 seconds. After sampling, data is not visible for up to 60 seconds.
+- Container Startup Latency (ms): Distribution of time spent starting a new container instance in milliseconds. Sampled every 60 seconds. After sampling, data is not visible for up to 180 seconds.
+- Instance count: Number of container instances that exist, broken down by state. Sampled every 60 seconds. After sampling, data is not visible for up to 120 seconds. state: Whether a container is "active" or "idle".
+- Request Count: Number of requests reaching the revision. Excludes requests that are not reaching your container instances (for example, unauthorized requests or when maximum number of instances is reached). Captured at the end of the request lifecycle. Sampled every 60 seconds. After sampling, data is not visible for up to 180 seconds.
 
 The following text is a heuristic analysis feedback of the metric data:
 {heuristic_feedback}

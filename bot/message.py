@@ -1,16 +1,19 @@
 import discord
+from feedback import create_thread
 
 
-async def send_embedded_warning(channel, message: str = "duck"):
+async def send_embedded_warning(channel,warning_mess:dict):
     # 創建一個 Embed 對象
     embed = discord.Embed(
-        title="WARNING", description="We're out of CPU !!!", color=0xF31CC8
+        title = warning_mess["severity"],
+        description="We're out of CPU !!!",
+        color=0xF31CC8
     )
 
     # 添加欄位
     embed.add_field(
         name="Suggestion1: Auto Scale \n",
-        value=message,
+        value="Hi There! Have you receive my warning?",
         inline=False,
     )
     embed.add_field(
@@ -25,8 +28,6 @@ async def send_embedded_warning(channel, message: str = "duck"):
     message = await channel.send(embed=embed)
 
     # 創建討論串
-    from .feedback import create_thread
-
     await create_thread(message)
 
 

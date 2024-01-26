@@ -1,0 +1,20 @@
+name: Consumer CI
+
+on:
+    push:
+        branches: [ feature/wheel_ci ]
+
+env:
+  WHEEL_CI_SERVICE_NAME: test
+  WHEEL_CI_SERVICE_HOST: https://quickly-renewing-lobster.ngrok-free.app 
+
+jobs:
+    docker:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Trigger webhook using curl
+              run: |
+                curl -X POST -H "Content-Type: application/json" -d '{"token": "${{ secrets.WHEEL_CI_TOKEN }}"}' ${{ env.WHEEL_CI_SERVICE_HOST }}/api/v1/webhooks/github/service/${{ env.WHEEL_CI_SERVICE_NAME }}
+

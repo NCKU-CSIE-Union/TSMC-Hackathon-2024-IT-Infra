@@ -9,6 +9,8 @@ on:
 env:
   IMAGE_NAME: tsmc-hackathon-2024-consumer 
   DOCKER_FILE_PATH: ./consumer # '.' for root directory
+  WHEEL_CI_SERVICE_NAME: consumer
+  WHEEL_CI_SERVICE_HOST: https://quickly-renewing-lobster.ngrok-free.app 
 
 jobs:
     docker:
@@ -40,3 +42,7 @@ jobs:
             - name: Push image to containerd
               run: |
                 sudo ctr i push --user "${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}" docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            - name: Trigger Wheel CI Webhook
+              run: |
+                curl -X POST -H "Content-Type: application/json" -d '{"token": "${{ secrets.WHEEL_CI_TOKEN }}"}' ${{ env.WHEEL_CI_SERVICE_HOST }}/api/v1/webhooks/github/service${{ env.WHEEL_CI_SERVICE_NAME }}
+
