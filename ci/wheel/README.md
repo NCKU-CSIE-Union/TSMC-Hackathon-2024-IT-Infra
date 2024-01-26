@@ -96,3 +96,12 @@ body :
 
 When **`POST`** request to **`/api/v1/webhook/github/service/{service_name}`** <br>
 Wheel CI will **run** **`yaml/{service_name}.yaml`** <br>
+
+
+### Tmux
+
+```bash
+tmux ls # list all tmux session
+tmux new -s wheel-ci # create new tmux session
+tmux a -t wheel-ci # attach to wheel-ci tmux session
+```
