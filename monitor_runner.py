@@ -1,5 +1,6 @@
 import asyncio
 import re
+import time
 
 import pandas as pd
 
@@ -55,12 +56,13 @@ async def main():
     # bot_thread = threading.Thread(target=run_bot)
     # bot_thread.start()
     cloudrun_manager = cloudrun.CloudRunManager()
+    target_service_name = "consumer-sentry"
 
     while True:
         print("fetching...")
         log_df: pd.DataFrame = pd.DataFrame()
         for log_line in log.tail_log_entry(
-            service_name="consumer-sentry", max_results=10
+            service_name=target_service_name, max_results=100
         ):
             parse_df = parser(log_line)
             log_df = pd.concat([log_df, parse_df], ignore_index=True)
@@ -80,8 +82,9 @@ async def main():
         # TODO: convert the min and max time to the time.time() format
 
         metrics_df: pd.DataFrame = cloudrun_manager.get_metrics(
-            "consumer-sentry", min_time, max_time
+            target_service_name, min_time, max_time
         )
+        print(metrics_df)
         # print(metrics_df)
         # metrics_df["Time"] = pd.to_datetime(metrics_df["Time"])
         # log_df["Time"] = pd.to_datetime(log_df["Time"])
@@ -91,9 +94,11 @@ async def main():
         # print(metrics_df.columns, log_df.columns)
         metrics_df["Time"] = pd.to_datetime(metrics_df["Time"])
         log_df["Time"] = pd.to_datetime(log_df["Time"]).dt.floor("s")
+        # log_df.drop(columns=["level"], inplace=True)
+        # log_df.resample("1Min", on="Time").mean()
 
         # Set a 60 seconds tolerance for merging
-        tolerance = pd.Timedelta(seconds=60)
+        # tolerance = pd.Timedelta(seconds=60)
 
         # Perform an asof merge with a tolerance of 60 seconds
         # merged_df = pd.merge_asof(
@@ -103,10 +108,11 @@ async def main():
         #     tolerance=tolerance,
         #     direction="nearest",
         # )
-        merged_df = pd.merge(log_df, metrics_df, on="Time", how="outer")
+        merged_df = pd.merge(metrics_df, log_df, on="Time", how="inner")
 
         with open("merge.csv", "a") as f:
             merged_df.to_csv(f, mode="a", header=f.tell() == 0, index=False)
+        time.sleep(60)
         # result = analyze_by_llm(fill_missing_columns(merged_df))
 
         # pd.

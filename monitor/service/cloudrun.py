@@ -240,7 +240,7 @@ class CloudRunManager:
                 metric_name="run.googleapis.com/container/instance_count",
                 aggregation=monitoring_v3.Aggregation(
                     alignment_period={"seconds": 60},
-                    per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_NONE,
+                    per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
                     cross_series_reducer=monitoring_v3.Aggregation.Reducer.REDUCE_NONE,
                 ),
             ),
@@ -311,7 +311,7 @@ if __name__ == "__main__":
     # run_manager.increase_cpu_ram("consumer", cpu_delta=1, ram_delta=69)
     # run_manager.increase_instance_count("consumer", 69)
 
-    metric = run_manager.get_metrics("consumer-latest")
+    metric = run_manager.get_metrics("consumer-sentry")
     print(metric)
     exit()
     # print(metric)
