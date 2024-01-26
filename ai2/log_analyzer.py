@@ -3,6 +3,7 @@ from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_google_vertexai import VertexAI
 from pinecone import Pinecone
+from vertexai.language_models import TextEmbeddingModel
 
 
 class LLMLogAnalyzer:
@@ -11,6 +12,10 @@ class LLMLogAnalyzer:
 
         pc = Pinecone(api_key=pinecone_api_key)
         self.db = pc.Index(index_name)
+
+        self.embedding_model = TextEmbeddingModel.from_pretrained(
+            "textembedding-gecko@003"
+        )
 
         # Define output parser and generate format instruction
         severity_schema = ResponseSchema(
@@ -42,7 +47,7 @@ class LLMLogAnalyzer:
         self.format_instruction = self.output_parser.get_format_instructions()
 
         # Define model and prompt template
-        prompt_template = PromptTemplate.from_template(
+        self.prompt_template = PromptTemplate.from_template(
             """\
 The following text contains log data for a Google Cloud Run application. \
 This data is presented in CSV format and encompasses the most recent {time_span} minutes:
@@ -58,9 +63,6 @@ The system will automatically scale the application based on your feedback.
 {format_instruction}
 """
         )
-
-        # Define analysis chain
-        self.analysis_chain = prompt_template | self.llm
 
     def _heuristic_analysis(self, log_df: pd.DataFrame) -> str:
         feedback = ""
@@ -97,17 +99,62 @@ The system will automatically scale the application based on your feedback.
         heuristic_feedback = self._heuristic_analysis(log_df)
 
         # Invoke the model
-        feedback = self.analysis_chain.invoke(
-            {
-                "log_data": log_df.to_csv(index=False),
-                "time_span": len(log_df),
-                "heuristic_analysis": heuristic_feedback,
-                "format_instruction": self.format_instruction,
-            }
+        prompt = self.prompt_template.format_prompt(
+            log_data=log_df.to_csv(index=False),
+            time_span=len(log_df),
+            heuristic_analysis=heuristic_feedback,
+            format_instruction=self.format_instruction,
         )
+        feedback = self.llm.invoke(prompt)
 
         # Parse the output
         feedback_dict = self.output_parser.parse(feedback)
+        feedback_dict["prompt"] = prompt.text
         feedback_dict["metric_dataframe"] = log_df
         feedback_dict["timestamp"] = log_df.iloc[-1]["Time"]
         return feedback_dict
+
+    def store_memory(self, id: str, log_df: pd.DataFrame, prompt: str, response: str):
+        log_embedding = self.embedding_model.get_embeddings(
+            [log_df.to_csv(index=False)]
+        )[0].values
+
+        # Manually format the memory as string because Pinecone does not support langchain memory as metadata
+        memory = f"\nHuman: {prompt}\nAI: {response}"
+
+        # Store the feedback in Pinecone
+        self.db.upsert(
+            vectors=[
+                {
+                    "id": id,
+                    "values": log_embedding,
+                    "metadata": {"memory": memory},
+                }
+            ]
+        )
+
+    def chat(self, id: str, prompt: str) -> str:
+        # Retrieve the memory from Pinecone
+        record = self.db.fetch(ids=[id])["vectors"][id]
+        memory = record["metadata"]["memory"]
+
+        # Generate response
+        response = self.llm.invoke(
+            f"""\
+Prompt after formatting:
+The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.
+
+Current conversation:
+
+{memory}
+Human: {prompt}
+AI:
+
+"""
+        )
+
+        # Update memory
+        memory += f"\nHuman: {prompt}\nAI: {response}\n"
+        self.db.update(id=id, set_metadata={"memory": memory})
+
+        return response
