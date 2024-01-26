@@ -2,11 +2,11 @@ version: '1.0'
 
 services:
   wheel_ci:
-    image: jasonbigcow/wheel_ci:latest
+    image: jasonbigcow/wheel_ci:linux
     ports:
       - 8080:8080
     env_file:
-      - .env/dev.env
+      - .env
     restart: always
     volumes:
       - ./yaml:/app/yaml

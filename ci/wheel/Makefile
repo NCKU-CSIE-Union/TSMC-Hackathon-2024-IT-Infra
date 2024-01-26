@@ -5,10 +5,10 @@ build-linux:
 push:
 	docker push jasonbigcow/wheel_ci
 compose:
-	docker-compose up -d
-	docker-compose logs -f
+	docker compose up -d
+	docker compose logs -f
 down:
-	docker-compose down
+	docker compose down
 
 runner:
 	python3 runner/run.py
