@@ -21,14 +21,16 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
-
 test_info = {
     "severity": "ERROR",
-    "message": "The application is experiencing errors. The following errors have been detected:\n\n* Failed response detected 19 times over the last 5 minutes.\n\nThe potential cause of the error is that the application is not able to handle the load. This could be due to a number of factors, such as:\n\n* The application is not scalable.\n* The application is not using the correct resources.\n* The application is not properly configured.\n\nTo fix the error, you should:\n\n* Review the application's architecture and make sure that it is scalable.\n* Review the application's resource usage and make sure that it is using the correct resources.\n* Review the application's configuration and make sure that it is properly configured.\n\nIf you are unable to fix the error, you should contact Google Cloud support for assistance.",
-    # "metric_dataframe": pd.DataFrame,
-    "timestamp": "Thu Dec 07 2023 09:04:00",
+    "cpu": -1,
+    "memory": 0,
+    "instance": 1,
+    "message": "The application is experiencing high latency and is unable to keep up with the demand. The number of tasks in the queue has been above 100 for the past 5 minutes and the average task execution time has been above 30 seconds. I recommend increasing the number of instances by 1.",
+    "timestamp": "2024-01-26 11:05:49+00:00"
+    # 'metric_dataframe': pd.DataFrame
 }
-warning_message = {"severity": "WARNING", "message": "This is a test warning message."}
+
 
 
 async def update_active_threads():
