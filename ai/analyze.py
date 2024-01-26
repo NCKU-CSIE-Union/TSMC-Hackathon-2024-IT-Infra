@@ -92,6 +92,8 @@ def analyze_fail_response(metric_df: pd.DataFrame) -> str:
 
     if failed_response_count == 0:
         feedback = f"- INFO: No failed response detected over the last {len(metric_df)} minutes.\n"
+    else:
+        feedback += f"- ERROR: Failed response detected {int(failed_response_count)} times over the last {len(metric_df)} minutes.\n"
 
     return feedback
 
