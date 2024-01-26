@@ -85,31 +85,3 @@ class ConversationManager:
         self.redis.hset(
             discord_thread_id, "user_messages", str(conversation_user_messages)
         )
-
-
-if __name__ == "__main__":
-    manager = ConversationManager()
-
-    df = pd.DataFrame()
-    df["Time"] = [1, 2, 3, 4, 5]
-    manager.new_conversation("discord_thread_1233", df)
-    print(" create new conversation")
-
-    print(manager.get_conversation("discord_thread_1233"))
-    print(" get conversation")
-
-    manager.update_conversation_feedbacks("discord_thread_1233", "feedback1")
-    manager.update_conversation_feedbacks("discord_thread_1233", "feedback2")
-
-    manager.update_conversation_user_messages("discord_thread_1233", "user_message1")
-    print(" update conversation")
-
-    print(manager.get_conversation("discord_thread_1233"))
-
-    manager.update_conversation_feedbacks("discord_thread_1233", "feedback1")
-    manager.update_conversation_feedbacks("discord_thread_1233", "feedback2")
-
-    manager.update_conversation_user_messages("discord_thread_1233", "user_message1")
-    print(" update conversation")
-
-    print(manager.get_conversation("discord_thread_1233"))
