@@ -1,5 +1,8 @@
 name: Yaml A
 steps:
+  - name: Test commands 
+    commands:
+      - ls -la
   - name: Stop current container
     commands:
       - sudo docker stop hello-world
