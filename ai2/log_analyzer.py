@@ -53,6 +53,8 @@ The following text contains log data for a Google Cloud Run application. \
 This data is presented in CSV format and encompasses the most recent {time_span} minutes:
 {log_data}
 
+{memory}
+
 Some heuristic analysis has been performed beforehand, the following text is a summary of the analysis:
 {heuristic_analysis}
 
@@ -98,24 +100,48 @@ The system will automatically scale the application based on your feedback.
         # Perform heuristic analysis to aid the model
         heuristic_feedback = self._heuristic_analysis(log_df)
 
+        # Query a similar log from Pinecone, which acts as a memory for the model
+        log_embedding = self.embedding_model.get_embeddings(
+            [log_df.to_csv(index=False)]
+        )[0].values
+        matches = self.db.query(vector=log_embedding, top_k=1, include_metadata=True)[
+            "matches"
+        ]
+
+        # Generate memory if a log with high similarity score is found in past analysis
+        memory = ""
+        if len(matches) > 0 and matches[0]["score"] > 0.8:
+            similar_log = matches[0]
+            memory = f"""\
+We encountered a similar log in the past, with the following log data in CSV format:
+{similar_log['metadata']['log_csv']}
+
+The following text delimited by triple backticks is the chat history between a human and an AI, which is a summary of the analysis and scaling action taken in the past:
+```
+analysis: {similar_log['metadata']['chat_memory']}
+```
+"""
+
+        # Define input variables for the prompt template
+        input_variables = {
+            "log_data": log_df.to_csv(index=False),
+            "memory": memory,
+            "time_span": len(log_df),
+            "heuristic_analysis": heuristic_feedback,
+            "format_instruction": self.format_instruction,
+        }
+
         # Invoke the model
-        prompt = self.prompt_template.format_prompt(
-            log_data=log_df.to_csv(index=False),
-            time_span=len(log_df),
-            heuristic_analysis=heuristic_feedback,
-            format_instruction=self.format_instruction,
-        )
+        prompt = self.prompt_template.format_prompt(**input_variables)
         feedback = self.llm.invoke(prompt)
 
         # Parse the output
         feedback_dict = self.output_parser.parse(feedback)
 
         # Add the prompt to the feedback, note that the prompt here does not include format instruction, to avoid unexpected response when chatting
+        input_variables["format_instruction"] = ""
         feedback_dict["prompt"] = self.prompt_template.format_prompt(
-            log_data=log_df.to_csv(index=False),
-            time_span=len(log_df),
-            heuristic_analysis=heuristic_feedback,
-            format_instruction="",
+            **input_variables
         ).text
 
         feedback_dict["metric_dataframe"] = log_df
@@ -159,7 +185,8 @@ The system will automatically scale the application based on your feedback.
         response = self.llm.invoke(
             f"""\
 Prompt after formatting:
-The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.
+The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know. \
+Please assume that the human is more experienced than the AI, and the AI should trust the human's judgement.
 
 Current conversation:
 
