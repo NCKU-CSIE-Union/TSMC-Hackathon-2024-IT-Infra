@@ -270,7 +270,8 @@ class CloudRunManager:
                     data.append(
                         {
                             "Time": datetime.datetime.fromtimestamp(
-                                point.interval.end_time.timestamp()
+                                point.interval.end_time.timestamp(),
+                                datetime.timezone.utc,
                             ),
                             metric.column_name: point.value.double_value,
                         }
@@ -291,6 +292,7 @@ class CloudRunManager:
         # fill missing columns with time interpolation
         metric_df.set_index("Time", inplace=True)
         metric_df = metric_df.interpolate(method="time")
+        metric_df.reset_index(inplace=True)
 
         return metric_df
 
