@@ -2,8 +2,6 @@ from datetime import datetime
 
 import discord
 
-from .feedback import create_thread
-
 
 async def send_embedded_message(channel, info: dict):
     # 創建一個 Embed 對象
@@ -23,8 +21,7 @@ async def send_embedded_message(channel, info: dict):
     # 發送訊息
     message = await channel.send(embed=embed)
 
-    # 創建討論串
-    await create_thread(message)
+    return message
 
     # 添加欄位
     # embed.add_field(
