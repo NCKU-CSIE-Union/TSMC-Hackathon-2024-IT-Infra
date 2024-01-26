@@ -15,7 +15,7 @@ class LLMLogAnalyzer:
         # Define output parser and generate format instruction
         severity_schema = ResponseSchema(
             name="severity",
-            description='Severity level of the analysis feedback. Use "WARNING" if the analysis detects any potential problems or "INFO" if no problems are identified.',
+            description='The severity of the analysis feedback is categorized as follows: "ERROR" indicates severe problems that require immediate scaling action, "WARNING" suggests less severe issues that nonetheless require caution, and "INFO" denotes the absence of problems.',
         )
         cpu_schema = ResponseSchema(
             name="cpu",
