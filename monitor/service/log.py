@@ -103,7 +103,7 @@ def tail_log_entry(service_name, max_results=10):
     )
 
     for entry in query:
-        yield f"{entry.timestamp} {entry.payload}"
+        yield entry.payload
 
 
 # REST API
