@@ -126,9 +126,14 @@ class MonitorRunner:
             # response = analyze_by_llm(merged_df)
             response = {  # TODO: substitute with analyze_by_llm
                 "severity": "ERROR",
-                "message": "fuck you",
-                "timestamp": "Thu Dec 07 2023 09:04:00",
+                "cpu": -1,
+                "memory": 0,
+                "instance": 1,
+                "message": "The application is experiencing high latency and is unable to keep up with the demand. The number of tasks in the queue has been above 100 for the past 5 minutes and the average task execution time has been above 30 seconds. I recommend increasing the number of instances by 1.",
+                "timestamp": "2024-01-26 11:05:49+00:00",
+                # 'metric_dataframe': pd.DataFrame
             }
+
             # if response["need_alert"]:  # TODO: add alert condition
             thread_id = asyncio.run_coroutine_threadsafe(
                 self.send_alert(message_dict=response), self.discord_client.loop
