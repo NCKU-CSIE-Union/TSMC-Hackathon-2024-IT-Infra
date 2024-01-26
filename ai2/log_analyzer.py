@@ -109,18 +109,30 @@ The system will automatically scale the application based on your feedback.
 
         # Parse the output
         feedback_dict = self.output_parser.parse(feedback)
-        feedback_dict["prompt"] = prompt.text
+
+        # Add the prompt to the feedback, note that the prompt here does not include format instruction, to avoid unexpected response when chatting
+        feedback_dict["prompt"] = self.prompt_template.format_prompt(
+            log_data=log_df.to_csv(index=False),
+            time_span=len(log_df),
+            heuristic_analysis=heuristic_feedback,
+            format_instruction="",
+        ).text
+
         feedback_dict["metric_dataframe"] = log_df
         feedback_dict["timestamp"] = log_df.iloc[-1]["Time"]
         return feedback_dict
 
-    def store_memory(self, id: str, log_df: pd.DataFrame, prompt: str, response: str):
+    def store_memory(
+        self, id: str, log_df: pd.DataFrame, initial_prompt: str, response: str
+    ):
         log_embedding = self.embedding_model.get_embeddings(
             [log_df.to_csv(index=False)]
         )[0].values
 
         # Manually format the memory as string because Pinecone does not support langchain memory as metadata
-        memory = f"\nHuman: {prompt}\nAI: {response}"
+        # Note that the initial prompt is not included in the chat history, because we don't want to include it when
+        # this information is retrieved for another analysis.
+        chat_memory = f"AI: {response}"
 
         # Store the feedback in Pinecone
         self.db.upsert(
@@ -128,7 +140,11 @@ The system will automatically scale the application based on your feedback.
                 {
                     "id": id,
                     "values": log_embedding,
-                    "metadata": {"memory": memory},
+                    "metadata": {
+                        "log_csv": log_df.to_csv(index=False),
+                        "initial_prompt": initial_prompt,
+                        "chat_memory": chat_memory,
+                    },
                 }
             ]
         )
@@ -136,7 +152,8 @@ The system will automatically scale the application based on your feedback.
     def chat(self, id: str, prompt: str) -> str:
         # Retrieve the memory from Pinecone
         record = self.db.fetch(ids=[id])["vectors"][id]
-        memory = record["metadata"]["memory"]
+        initial_prompt = record["metadata"]["initial_prompt"]
+        chat_memory = record["metadata"]["chat_memory"]
 
         # Generate response
         response = self.llm.invoke(
@@ -146,7 +163,8 @@ The following is a friendly conversation between a human and an AI. The AI is ta
 
 Current conversation:
 
-{memory}
+Human: {initial_prompt}
+{chat_memory}
 Human: {prompt}
 AI:
 
@@ -154,7 +172,7 @@ AI:
         )
 
         # Update memory
-        memory += f"\nHuman: {prompt}\nAI: {response}\n"
-        self.db.update(id=id, set_metadata={"memory": memory})
+        chat_memory += f"\nHuman: {prompt}\nAI: {response}\n"
+        self.db.update(id=id, set_metadata={"chat_memory": chat_memory})
 
         return response
