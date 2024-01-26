@@ -1,24 +1,24 @@
-import discord
-from feedback import create_thread
 from datetime import datetime
 
+import discord
+from feedback import create_thread
 
-async def send_embedded_message(channel,info:dict):
+
+async def send_embedded_message(channel, info: dict):
     # 創建一個 Embed 對象
     embed = discord.Embed(
-        title = info["severity"],
-        description=info["message"],
-        color=0xF31CC8
+        title=info["severity"], description=info["message"], color=0xF31CC8
     )
-    
+
     # 設置 timestamp
     timestamp_format = "%a %b %d %Y %H:%M:%S"
     parsed_timestamp = datetime.strptime(info["timestamp"], timestamp_format)
     embed.timestamp = parsed_timestamp
-    
+
     # 設置腳註
-    embed.set_footer(text=f"{info["severity"]} Message by your system buddy")
-    
+    severity = info["severity"]
+    embed.set_footer(text=f"{severity} Message by your system buddy")
+
     # 發送訊息
     message = await channel.send(embed=embed)
 
@@ -36,7 +36,6 @@ async def send_embedded_message(channel,info:dict):
     #     value="There's nothing we can do bruh",
     #     inline=False,
     # )
-
 
 
 # async def send_embedded_error(channel):
@@ -63,7 +62,7 @@ async def send_embedded_message(channel,info:dict):
 #     embed.set_footer(text="Error Message by your system buddy")
 
 #     await channel.send(embed=embed)
-    
+
 #     # 創建討論串
 #     await create_thread(message)
 
