@@ -10,6 +10,13 @@ test-mointor:
 	coverage report -m
 	coverage html
 
+test-llm-analyzer:
+	@echo "Starting monitor pytest"
+	coverage run -m pytest ai2/tests
+	@echo "Generating coverage report"
+	coverage report -m
+	coverage html
+
 test-mointor-cloud-run-manager:
 	@echo "Starting `cloud_run_manager` Test"
 	coverage run -m pytest monitor/tests/test_cloud_run_manager.py
