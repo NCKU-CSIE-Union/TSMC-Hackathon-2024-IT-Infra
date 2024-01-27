@@ -51,6 +51,7 @@ class MonitorRunner:
         discord_thread_manager: DiscordThreadManager,
         target_service_name="consumer-latest",
         cloudrun_manager: CloudRunManager = CloudRunManager(),
+        log_size=10,
     ):
         self.llm_log_analyzer = llm_log_analyzer
         self.discord_client = client
@@ -58,6 +59,7 @@ class MonitorRunner:
         self.cloudrun_manager = cloudrun_manager
         self.discord_thread_manager = discord_thread_manager
         self.target_service_name = target_service_name
+        self.log_size = log_size
 
     def get_agent_response(self, conversion_id: str, user_message: str):
         return self.llm_log_analyzer.chat(conversion_id, user_message)
@@ -83,7 +85,9 @@ class MonitorRunner:
     def fetch_and_process_logs(self):
         log_df = pd.DataFrame()
         # Assume log.tail_log_entry is an async function
-        for log_line in log.tail_log_entry(self.target_service_name, max_results=10):
+        for log_line in log.tail_log_entry(
+            self.target_service_name, max_results=self.log_size
+        ):
             parse_df = parser(log_line)
             log_df = pd.concat([log_df, parse_df])
         return log_df

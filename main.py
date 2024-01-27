@@ -32,6 +32,7 @@ if __name__ == "__main__":
     discord_bot_token = os.getenv("DISCORD_BOT_TOKEN")
     discord_dst_channel_id = int(os.getenv("DISCORD_DST_CHANNEL_ID"))
     pinecone_api_key = os.getenv("PINECONE_API_KEY")
+    log_size = os.getenv("LOG_SIZE", 10)
     service_name = "consumer-latest"
 
     # init discord client
@@ -64,6 +65,7 @@ if __name__ == "__main__":
         discord_thread_manager=discord_thread_manager,
         target_service_name=service_name,
         cloudrun_manager=cloudrun_manager,
+        log_size=log_size,
     )
 
     discord_bot = DiscordBot(
