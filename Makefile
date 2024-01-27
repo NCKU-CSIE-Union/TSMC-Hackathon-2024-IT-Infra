@@ -24,5 +24,22 @@ test-mointor-conversation-manager:
 	coverage report -m
 	coverage html
 
+build-main-mac:
+	@echo "Building main"
+	docker build -t jasonbigcow/tsmc_main:mac . 
+
+
+build-main-linux:
+	@echo "Building main"
+	docker build -t jasonbigcow/tsmc_main:linux --platform linux/amd64 . 
+
+run-main-mac:
+	@echo "Starting main"
+	docker compose up -f docker-compose-mac.yml
+
+run-main-linux:
+	@echo "Starting main"
+	docker compose up -f docker-compose.yml
+
 	
 
