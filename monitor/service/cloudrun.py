@@ -223,7 +223,7 @@ class CloudRunManager:
             aggregation: monitoring_v3.Aggregation = monitoring_v3.Aggregation(
                 alignment_period={"seconds": 60},
                 per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_DELTA,
-                cross_series_reducer=monitoring_v3.Aggregation.Reducer.REDUCE_MEAN,
+                cross_series_reducer=monitoring_v3.Aggregation.Reducer.REDUCE_PERCENTILE_50,
             )
 
         metric_filters = [
@@ -311,7 +311,7 @@ if __name__ == "__main__":
     # run_manager.increase_cpu_ram("consumer", cpu_delta=1, ram_delta=69)
     # run_manager.increase_instance_count("consumer", 69)
 
-    metric = run_manager.get_metrics("consumer-sentry")
+    metric = run_manager.get_metrics("consumer-latest")
     print(metric)
     exit()
     # print(metric)
