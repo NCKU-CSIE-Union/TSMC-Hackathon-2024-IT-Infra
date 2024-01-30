@@ -31,6 +31,13 @@ test-mointor-conversation-manager:
 	coverage report -m
 	coverage html
 
+test-bot:
+	@echo "Starting bot pytest"
+	coverage run -m pytest bot/tests
+	@echo "Generating coverage report"
+	coverage report -m
+	coverage html
+
 build-main-mac:
 	@echo "Building main"
 	docker build -t jasonbigcow/tsmc_main:mac . 
