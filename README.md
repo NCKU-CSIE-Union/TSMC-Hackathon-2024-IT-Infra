@@ -1,11 +1,5 @@
 # TSMC Hackathon 2024 IT Infra
 
-> [!IMPORTANT]
-> We use **`Poetry`** to manage python package and virtual environment !!!
-
-<!-- 
-https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
- -->
 
 ## Summary
 
@@ -13,7 +7,7 @@ https://docs.github.com/en/get-started/writing-on-github/getting-started-with-wr
   - Analyze Log
   - Store Log and feedback
   - Self-Improved Analyzer progressively
-- monitor controller
+- Monitor controller
   - Retrieve Log and Metric
   - Scale Cloud Run Actively
   - The Bridge between GenAI and Discord Bot
@@ -35,17 +29,28 @@ https://docs.github.com/en/get-started/writing-on-github/getting-started-with-wr
   - CI/CD
   - Docker / Containerization
 
-## Idea Note
+> System Architecture : <br>
+> ![](https://raw.githubusercontent.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/main/docs/system-architecture.png)
 
-<!-- ## TODO
+## Presentation
 
-- [AI](#AI)
-- [DevOps](#DevOps)
-- [Monitor System (GCE)](#Monitor-System-GCE)
-- [Consumer (Consumer Cloud)](#Consumer-Cloud-Run)
-- [Discord Bot](#Service-Discord-Bot) -->
+> Presentation : <br>
+> [![](https://raw.githubusercontent.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/main/docs/pdf-preview.png)](https://github.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/blob/main/2024-TSMC-IT-CareerHack-Presentation.pdf)
+
+<!-- [Final Presentation PDF](https://github.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/blob/main/2024-TSMC-IT-CareerHack-Presentation.pdf) -->
+
+[💡Idea Note](https://github.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/blob/main/docs/Idea.md)
+
+## Authors
+
+- [@HenryChang6](https://www.github.com/HenryChang6)
+- [@jason810496](https://www.github.com/jason810496)
+- [@jerrykal](https://www.github.com/jerrykal)
+- [@peterxcli](https://www.github.com/peterxcli)
 
 ## Gitflow
+
+> ![source-tree](https://raw.githubusercontent.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/main/docs/gitflow.png)
 
 ### branch
 
