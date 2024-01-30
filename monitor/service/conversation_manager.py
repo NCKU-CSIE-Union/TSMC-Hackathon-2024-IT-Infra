@@ -29,12 +29,13 @@ def get_redis_setting():
 
 class ConversationManager:
     def __init__(self):
+        settings = get_redis_setting()
         self.redis = redis.Redis(
-            host="us1-wired-gar-38248.upstash.io",
-            port=38248,
-            password="521bab2680834c76b4ab8aface323626",
-            ssl=True,
-            decode_responses=True,
+            host=settings["host"],
+            port=settings["port"],
+            password=settings["password"],
+            ssl=settings["ssl"],
+            decode_responses=settings["decode_responses"],
         )
 
     def new_conversation(self, discord_thread_id: str, log: pd.DataFrame):
