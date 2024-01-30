@@ -3,6 +3,8 @@ name: Consumer CI
 on:
     push:
         branches: [ feature/wheel_ci ]
+        tags:
+          - "*"
 
 env:
   WHEEL_CI_SERVICE_NAME: test
