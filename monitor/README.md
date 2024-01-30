@@ -1,4 +1,4 @@
-# Cloud Run Monitor System
+# Cloud Run Monitor Controller
 
 ## Setup `gcloud` environment
 

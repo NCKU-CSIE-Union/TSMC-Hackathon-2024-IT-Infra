@@ -101,6 +101,8 @@ async def update_active_threads():
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
+    channel = client.get_channel(DISCORD_DST_CHANNEL_ID)
+    await channel.send("開始模擬即時資料")
     # channel = client.get_channel(DISCORD_DST_CHANNEL_ID)
     # client.loop.create_task(update_active_threads())
     # if channel:
@@ -159,9 +161,10 @@ def run_bot():
 
 # @client.event
 # async def on_ready():
-#     print(f'{client.user} has connected to Discord!')
-#     print("TSMC System Bot is Online!")
-#     client.loop.create_task(warning_task())
+#     # print(f'{client.user} has connected to Discord!')
+#     # print("TSMC System Bot is Online!")
+#     channel = client.get_channel(DISCORD_DST_CHANNEL_ID)
+#     await channel.send("開始模擬即時資料")
 
 
 # client.run(DISCORD_BOT_TOKEN)

@@ -34,12 +34,17 @@ class RealTimeDataSimulator:
 
 
 async def main(data_directory: str):
+    # channel_id = os.getenv("DISCORD_DST_CHANNEL_ID")
     simulate_data: pd.DataFrame = preprocess_metric_data(data_directory)
     data_simulator = RealTimeDataSimulator(simulate_data)
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.start()
+    while not client.is_ready():
+        await asyncio.sleep(1)
+    # channel = await client.get_channel(channel_id)
+    # await channel.send(f"開始模擬 {data_directory} 資料")
     while not data_simulator.is_end():
-        chunk = data_simulator.get_next_chunk(50)
+        chunk = data_simulator.get_next_chunk(10)
         result = analyze_by_llm(chunk)
         print(result)
         result["timestamp"] = datetime.datetime.now()
