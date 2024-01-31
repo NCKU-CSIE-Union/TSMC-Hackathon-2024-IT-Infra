@@ -1,0 +1,11 @@
+name: Test Monitor Yaml
+steps:
+  - name: Run Monitor Tests
+    commands:
+      - coverage run -m pytest ../../monitor/tests
+  - name: Generate Coverage Report Summary
+    commands:
+      - coverage report -m
+  - name: Generate Coverage HTML Report
+    commands:
+      - coverage html

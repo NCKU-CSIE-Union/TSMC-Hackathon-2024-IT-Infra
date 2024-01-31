@@ -1,0 +1,88 @@
+# import asyncio
+# import re
+
+import pandas as pd
+
+# from ai.analyze import analyze_by_llm
+# from bot.bot import broadcast, client
+# from monitor.service import cloudrun, log
+
+import redis
+import os
+from dotenv import load_dotenv
+import json
+import ast
+from functools import lru_cache
+
+
+@lru_cache
+def get_redis_setting():
+    load_dotenv(".env/redis.env")
+    return {
+        "host": os.getenv("REDIS_HOST"),
+        "port": os.getenv("REDIS_PORT"),
+        "password": os.getenv("REDIS_PASSWORD"),
+        "ssl": True,
+        "decode_responses": True,
+    }
+
+
+class ConversationManager:
+    def __init__(self):
+        settings = get_redis_setting()
+        self.redis = redis.Redis(
+            host=settings["host"],
+            port=settings["port"],
+            password=settings["password"],
+            ssl=settings["ssl"],
+            decode_responses=settings["decode_responses"],
+        )
+
+    def new_conversation(self, discord_thread_id: str, log: pd.DataFrame):
+        new_conversation = {
+            "log": log.to_json(),
+            "feedbacks": [],
+            "user_messages": [],
+        }
+
+        for key in new_conversation:
+            new_conversation[key] = str(json.dumps(new_conversation[key]))
+
+        self.redis.hmset(discord_thread_id, new_conversation)
+
+    def get_conversation(self, discord_thread_id: str) -> dict:
+        """
+        {
+            "log": pd.DataFrame,
+            "feedbacks": List[str],
+            "user_messages": List[str],
+        }
+        """
+        raw_json = self.redis.hgetall(discord_thread_id)
+        raw_json["log"] = pd.read_json(json.loads(raw_json["log"]))
+        raw_json["feedbacks"] = ast.literal_eval(raw_json["feedbacks"])
+        raw_json["user_messages"] = ast.literal_eval(raw_json["user_messages"])
+
+        return raw_json
+
+    def update_conversation_feedbacks(self, discord_thread_id: str, feedbacks: str):
+        """
+        append the feedbacks to the feedbacks list
+        """
+        conversation_feedbacks = ast.literal_eval(
+            self.redis.hget(discord_thread_id, "feedbacks")
+        )
+
+        conversation_feedbacks.append(feedbacks)
+        self.redis.hset(discord_thread_id, "feedbacks", str(conversation_feedbacks))
+
+    def update_conversation_user_messages(
+        self, discord_thread_id: str, user_message: str
+    ):
+        conversation_user_messages = ast.literal_eval(
+            self.redis.hget(discord_thread_id, "user_messages")
+        )
+        conversation_user_messages.append(user_message)
+        self.redis.hset(
+            discord_thread_id, "user_messages", str(conversation_user_messages)
+        )

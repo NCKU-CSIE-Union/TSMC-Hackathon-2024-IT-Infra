@@ -1,0 +1,5 @@
+name: Deploy New Consumer Cloud Run
+steps:
+  - name: Call Deploy Function
+    commands:
+      - python3 dependency/deploy_iamge.py

@@ -1,27 +1,59 @@
 # TSMC Hackathon 2024 IT Infra
 
-> [!IMPORTANT]
-> We use **`Poetry`** to manage python package and virtual environment !!!
 
-<!-- 
-https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
- -->
+## Summary
 
-## Idea Note
+- GenAI (Vertex AI + Pinecone)
+  - Analyze Log
+  - Store Log and feedback
+  - Self-Improved Analyzer progressively
+- Monitor controller
+  - Retrieve Log and Metric
+  - Scale Cloud Run Actively
+  - The Bridge between GenAI and Discord Bot
+- Discord Bot
+  - Push alert
+  - Thread conversation
+- Consumer
+  - Serverless
+  - Simulate Scalable Generic Task Consumer
+  - Stress Test API to simulate real world scenario
+- Code coverage / TDD
+  - Pytest, High code coverage
+- Wheel CI (aka. build our CI from wheel)
+  - Workflow as Code (yaml format)
+  - Github webhook triggered
+- DevOps
+  - Github Action
+  - GitFlow
+  - CI/CD
+  - Docker / Containerization
 
+> System Architecture : <br>
+> ![](https://raw.githubusercontent.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/main/docs/system-architecture.png)
 
+## Presentation
 
-## TODO
+> Presentation : <br>
+> [![](https://raw.githubusercontent.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/main/docs/pdf-preview.png)](https://github.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/blob/main/2024-TSMC-IT-CareerHack-Presentation.pdf)
 
-- [AI](#AI)
-- [DevOps](#DevOps)
-- [Monitor System (GCE)](#Monitor-System-GCE)
-- [Consumer (Consumer Cloud)](#Consumer-Cloud-Run)
-- [Discord Bot](#Service-Discord-Bot)
+<!-- [Final Presentation PDF](https://github.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/blob/main/2024-TSMC-IT-CareerHack-Presentation.pdf) -->
+
+[💡Idea Note](https://github.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/blob/main/docs/Idea.md)
+
+## Authors
+
+- [@HenryChang6](https://www.github.com/HenryChang6)
+- [@jason810496](https://www.github.com/jason810496)
+- [@jerrykal](https://www.github.com/jerrykal)
+- [@peterxcli](https://www.github.com/peterxcli)
 
 ## Gitflow
 
+> ![source-tree](https://raw.githubusercontent.com/NCKU-CSIE-Union/TSMC-Hackathon-2024-IT-Infra/main/docs/gitflow.png)
+
 ### branch
+
 - main
 - develop
 - test
@@ -31,6 +63,7 @@ https://docs.github.com/en/get-started/writing-on-github/getting-started-with-wr
 - hotfix/xxx
 
 ### message
+
 - feat: 新增/修改功能 (feature)。
 - fix: 修補 bug (bug fix)。
 - docs: 文件 (documentation)。

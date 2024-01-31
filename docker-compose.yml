@@ -1,0 +1,13 @@
+version: '1.0'
+
+services:
+  wheel_ci:
+    image: jasonbigcow/tsmc_main:linux
+    env_file:
+      - .env/prod.env
+    restart: always
+    volumes:
+      - ./yaml:/app/yaml
+      - ./logs:/app/logs
+      - ./tasks:/app/tasks
+      - ./htmlcov:/app/htmlcov

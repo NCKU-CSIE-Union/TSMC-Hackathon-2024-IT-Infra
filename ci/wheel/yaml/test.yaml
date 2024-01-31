@@ -1,0 +1,14 @@
+name: Hello World of Wheel CI
+steps:
+  - name: Stop current container
+    commands:
+      - echo "Hello World"
+  - name: List current directory
+    commands:
+      - ls -la
+  - name: List current containers
+    commands:
+      - docker ps
+  - name: Run `gcloud` command on Host VM
+    commands:
+      - gcloud auth list
