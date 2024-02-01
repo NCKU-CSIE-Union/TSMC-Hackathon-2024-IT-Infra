@@ -3,27 +3,27 @@
 
 ## Summary
 
-- GenAI (Vertex AI + Pinecone)
+- **GenAI (Vertex AI + Pinecone)**
   - Analyze Log
   - Store Log and feedback
   - Self-Improved Analyzer progressively
-- Monitor controller
+- **Monitor controller**
   - Retrieve Log and Metric
   - Scale Cloud Run Actively
   - The Bridge between GenAI and Discord Bot
-- Discord Bot
+- **Discord Bot**
   - Push alert
   - Thread conversation
-- Consumer
+- **Consumer**
   - Serverless
   - Simulate Scalable Generic Task Consumer
   - Stress Test API to simulate real world scenario
-- Code coverage / TDD
+- **Code coverage / TDD**
   - Pytest, High code coverage
-- Wheel CI (aka. build our CI from wheel)
+- **Wheel CI (aka. build our CI from wheel)**
   - Workflow as Code (yaml format)
   - Github webhook triggered
-- DevOps
+- **DevOps**
   - Github Action
   - GitFlow
   - CI/CD
